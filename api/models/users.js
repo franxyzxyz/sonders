@@ -8,7 +8,6 @@ import { newError } from '../utils/errorHandler';
 import User from './neo4j/user';
 import { fieldMatch } from '../utils/validation';
 
-
 /**
 * @swagger
 * definitions:
@@ -24,12 +23,12 @@ import { fieldMatch } from '../utils/validation';
 const register = (req, res, next) => {
   const { username, password } = req.body;
   const session = dbUtils.getSession(req);
-  if (!username) {
-    throw newError(400, 'username is required');
-  }
-  if (!password) {
-    throw newError(400, 'password is required');
-  }
+  // if (!username) {
+  //   throw newError(400, 'username is required');
+  // }
+  // if (!password) {
+  //   throw newError(400, 'password is required');
+  // }
 
   session.run('MATCH (user:User {username: {username}}) RETURN user', { username })
     .then((results) => {

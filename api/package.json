@@ -7,18 +7,21 @@
     "start": "nodemon --ignore src/ app.js --exec babel-node"
   },
   "dependencies": {
+    "ajv": "^4.11.2",
     "bcrypt-nodejs": "^0.0.3",
     "body-parser": "^1.16.0",
     "express": "^4.14.0",
     "express-jwt": "^5.1.0",
     "jsonwebtoken": "^7.2.1",
     "lodash": "^4.17.4",
+    "morgan": "^1.7.0",
     "nconf": "^0.8.4",
     "neo4j-driver": "^1.0.5",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "swagger": "^0.7.5",
     "swagger-jsdoc": "^1.9.0",
+    "swagger-model-validator": "^2.1.8",
     "uuid": "^3.0.1"
   },
   "devDependencies": {

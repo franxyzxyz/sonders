@@ -20,6 +20,20 @@ nconf.env(['PORT', 'NODE_ENV'])
     'neo4j-remote': 'bolt://hobby-mejhniliojekgbkeamlhjool.dbs.graphenedb.com:24786',
     base_url: 'http://localhost:3000',
     api_path: '/api/v0',
+    users: {
+      name: {
+        minLength: 1,
+        maxLength: 10,
+      },
+      username: {
+        minLength: 1,
+        maxLength: 30,
+      },
+      password: {
+        minLength: 8,
+        maxLength: 100,
+      },
+    },
   });
 
 module.exports = nconf;

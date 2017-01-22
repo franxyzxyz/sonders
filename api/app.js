@@ -4,6 +4,7 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import passport from 'passport';
 import bodyParser from 'body-parser';
 import expressjwt from 'express-jwt';
+import logger from 'morgan';
 import nconf from './config';
 import { users } from './routes';
 
@@ -13,6 +14,7 @@ const app = express();
 const api = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(logger('dev'));
 
 const options = {
   swaggerDefinition: {
@@ -35,7 +37,7 @@ app.use(passport.session());
 
 // API Routes
 api.use(expressjwt({ secret: nconf.get('jwt_secret') }).unless({
-  path: [/login/i],
+  path: [/login/i, /register/i],
 }), users);
 
 api.get('/health', (req, res) => {
@@ -52,6 +54,7 @@ api.get('/swagger.json', (req, res) => {
 
 app.use((err, req, res, next) => {
   if (err) {
+    console.log(err)
     try {
       if (err.name === 'UnauthorizedError') {
         return res.status(err.status).json({

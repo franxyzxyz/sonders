@@ -1,9 +1,9 @@
 import _ from 'lodash';
 
 const User = (_node) => {
-  const username = _node.properties.username;
+  const { id, username } = _node.properties;
   return _.extend(this, {
-    id: _node.properties.id,
+    id,
     username,
   });
 };
