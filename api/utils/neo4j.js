@@ -7,7 +7,8 @@ const getSession = (context) => {
   if (context.neo4jSession) {
     return context.neo4jSession;
   }
-  return driver.session();
+  context.neo4jSession = driver.session();
+  return context.neo4jSession;
 };
 
 module.exports = {

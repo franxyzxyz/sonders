@@ -14,6 +14,7 @@ nconf.env(['PORT', 'NODE_ENV'])
     LOCAL_PASSWORD: process.env.NEO4JPWLOCAL,
     REMOTE_USERNAME: process.env.NEO4JUSERREMOTE,
     REMOTE_PASSWORD: process.env.NEO4JPWREMOTE,
+    jwt_secret: process.env.JWT_SECRET,
     neo4j: 'local',
     'neo4j-local': 'bolt://localhost:7687',
     'neo4j-remote': 'bolt://hobby-mejhniliojekgbkeamlhjool.dbs.graphenedb.com:24786',

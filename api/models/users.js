@@ -1,9 +1,13 @@
 import _ from 'lodash';
 import passport from 'passport';
+import jwt from 'jsonwebtoken';
 
+import nconf from '../config';
 import dbUtils from '../utils/neo4j';
 import { newError } from '../utils/errorHandler';
 import User from './neo4j/user';
+import { fieldMatch } from '../utils/validation';
+
 
 /**
 * @swagger
@@ -47,6 +51,27 @@ const register = (req, res, next) => {
     });
 };
 
+const login = (req, res, next) => {
+  if (!fieldMatch(req.body, ['username', 'password'])) {
+    throw newError(400, 'Fields unmatch');
+  }
+
+  passport.authenticate('local-login', (err, user, status) => {
+    if (err || !user) {
+      return next(newError(400, status.message));
+    }
+    const newUser = new User(user);
+    const token = jwt.sign(newUser, nconf.get('jwt_secret'));
+    return res.status(200).json({
+      success: true,
+      token,
+      user: newUser,
+      message: status.message,
+    });
+  })(req, res, next);
+};
+
 module.exports = {
   register,
+  login,
 };

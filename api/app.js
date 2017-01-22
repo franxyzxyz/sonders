@@ -3,6 +3,7 @@ import express from 'express';
 import swaggerJSDoc from 'swagger-jsdoc';
 import passport from 'passport';
 import bodyParser from 'body-parser';
+import expressjwt from 'express-jwt';
 import nconf from './config';
 import { users } from './routes';
 
@@ -33,7 +34,10 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // API Routes
-api.use(users);
+api.use(expressjwt({ secret: nconf.get('jwt_secret') }).unless({
+  path: [/login/i],
+}), users);
+
 api.get('/health', (req, res) => {
   res.status(200).json({
     status: 200,
@@ -49,6 +53,11 @@ api.get('/swagger.json', (req, res) => {
 app.use((err, req, res, next) => {
   if (err) {
     try {
+      if (err.name === 'UnauthorizedError') {
+        return res.status(err.status).json({
+          message: err.message,
+        });
+      }
       const json = JSON.parse(err.message);
       const { description, status } = json;
       res.status(status).json({

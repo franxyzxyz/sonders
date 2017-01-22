@@ -3,8 +3,8 @@ import Users from '../models/users';
 
 const router = Router();
 
-// router.route('/login')
-//   .post(Users.postLogin)
+router.route('/login')
+  .post(Users.login);
 
 router.route('/register')
   .post(Users.register);
