@@ -54,7 +54,6 @@ api.get('/swagger.json', (req, res) => {
 
 app.use((err, req, res, next) => {
   if (err) {
-    console.log(err)
     try {
       if (err.name === 'UnauthorizedError') {
         return res.status(err.status).json({

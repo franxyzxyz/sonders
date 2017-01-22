@@ -5,7 +5,7 @@ import { schemaValidator } from '../utils/validation';
 
 const router = Router();
 
-const SIGNUP_SCHEMA = {
+const REGISTER_SCHEMA = {
   type: 'object',
   properties: {
     name: {
@@ -27,10 +27,27 @@ const SIGNUP_SCHEMA = {
   required: ['name', 'username', 'password'],
 };
 
+const LOGIN_SCHEMA = {
+  type: 'object',
+  properties: {
+    username: {
+      type: 'string',
+      uniqueItems: true,
+      maxLength: nconf.get('users').username.maxLength,
+    },
+    password: {
+      type: 'string',
+      minLength: nconf.get('users').password.minLength,
+      maxLength: nconf.get('users').password.maxLength,
+    },
+  },
+  required: ['username', 'password'],
+};
+
 router.route('/login')
-  .post(Users.login);
+  .post(schemaValidator(LOGIN_SCHEMA), Users.login);
 
 router.route('/register')
-  .post(schemaValidator(SIGNUP_SCHEMA), Users.register);
+  .post(schemaValidator(REGISTER_SCHEMA), Users.register);
 
 module.exports = router;

@@ -21,14 +21,8 @@ import { fieldMatch } from '../utils/validation';
 */
 
 const register = (req, res, next) => {
-  const { username, password } = req.body;
+  const { username } = req.body;
   const session = dbUtils.getSession(req);
-  // if (!username) {
-  //   throw newError(400, 'username is required');
-  // }
-  // if (!password) {
-  //   throw newError(400, 'password is required');
-  // }
 
   session.run('MATCH (user:User {username: {username}}) RETURN user', { username })
     .then((results) => {
@@ -51,10 +45,6 @@ const register = (req, res, next) => {
 };
 
 const login = (req, res, next) => {
-  if (!fieldMatch(req.body, ['username', 'password'])) {
-    throw newError(400, 'Fields unmatch');
-  }
-
   passport.authenticate('local-login', (err, user, status) => {
     if (err || !user) {
       return next(newError(400, status.message));
