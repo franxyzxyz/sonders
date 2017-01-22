@@ -33,6 +33,17 @@ nconf.env(['PORT', 'NODE_ENV'])
         minLength: 8,
         maxLength: 100,
       },
+      email: {
+        maxLength: 100,
+      },
+      default: {
+        title: {
+          maxLength: 100,
+        },
+        paragraph: {
+          maxLength: 1000,
+        },
+      },
     },
   });
 

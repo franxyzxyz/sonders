@@ -14,6 +14,12 @@ const schemaValidator = schema => (
   }
 );
 
+const schemaValidatorBasic = (schema, body) => {
+  const test = body;
+  return ajv.validate(schema, test)
+};
+
 module.exports = {
   schemaValidator,
+  schemaValidatorBasic,
 };

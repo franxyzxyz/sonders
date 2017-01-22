@@ -2,26 +2,49 @@ import { Router } from 'express';
 import Users from '../models/users';
 import nconf from '../config';
 import { schemaValidator } from '../utils/validation';
+import { location, industry } from '../utils/users';
 
 const router = Router();
+const config = nconf.get('users');
 
 const REGISTER_SCHEMA = {
   type: 'object',
+  additionalProperties: false,
   properties: {
     name: {
       type: 'string',
-      minLength: nconf.get('users').name.minLength,
-      maxLength: nconf.get('users').name.maxLength,
+      minLength: config.name.minLength,
+      maxLength: config.name.maxLength,
     },
     username: {
       type: 'string',
       uniqueItems: true,
-      maxLength: nconf.get('users').username.maxLength,
+      maxLength: config.username.maxLength,
     },
     password: {
       type: 'string',
-      minLength: nconf.get('users').password.minLength,
-      maxLength: nconf.get('users').password.maxLength,
+      minLength: config.password.minLength,
+      maxLength: config.password.maxLength,
+    },
+    email: {
+      type: 'string',
+      format: 'email',
+      maxLength: config.email.maxLength,
+    },
+    location: {
+      type: 'string',
+      enum: Object.keys(location),
+    },
+    industry: {
+      type: 'string',
+      enum: industry,
+    },
+    role: {
+      type: 'array',
+      items: {
+        type: 'string',
+        maxLength: config.default.title.maxLength,
+      },
     },
   },
   required: ['name', 'username', 'password'],
@@ -29,6 +52,7 @@ const REGISTER_SCHEMA = {
 
 const LOGIN_SCHEMA = {
   type: 'object',
+  additionalProperties: false,
   properties: {
     username: {
       type: 'string',
@@ -44,10 +68,19 @@ const LOGIN_SCHEMA = {
   required: ['username', 'password'],
 };
 
+const UPDATE_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  properties: REGISTER_SCHEMA.properties,
+};
+
 router.route('/login')
   .post(schemaValidator(LOGIN_SCHEMA), Users.login);
 
 router.route('/register')
   .post(schemaValidator(REGISTER_SCHEMA), Users.register);
+
+router.route('/user')
+  .patch(schemaValidator(UPDATE_SCHEMA), Users.update);
 
 module.exports = router;

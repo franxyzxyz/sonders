@@ -3,10 +3,9 @@ import passport from 'passport';
 import jwt from 'jsonwebtoken';
 
 import nconf from '../config';
-import dbUtils from '../utils/neo4j';
+import { getSession, Users } from '../utils/neo4j';
 import { newError } from '../utils/errorHandler';
-import User from './neo4j/user';
-import { fieldMatch } from '../utils/validation';
+import { User, SessionUser } from './neo4j/user';
 
 /**
 * @swagger
@@ -22,9 +21,8 @@ import { fieldMatch } from '../utils/validation';
 
 const register = (req, res, next) => {
   const { username } = req.body;
-  const session = dbUtils.getSession(req);
-
-  session.run('MATCH (user:User {username: {username}}) RETURN user', { username })
+  const session = getSession(req);
+  session.run(Users.read({ username }), { username })
     .then((results) => {
       if (!_.isEmpty(results.records)) {
         throw newError(400, 'username already in use');
@@ -47,9 +45,9 @@ const register = (req, res, next) => {
 const login = (req, res, next) => {
   passport.authenticate('local-login', (err, user, status) => {
     if (err || !user) {
-      return next(newError(400, status.message));
+      return next(newError(400, err || status.message));
     }
-    const newUser = new User(user);
+    const newUser = new SessionUser(user);
     const token = jwt.sign(newUser, nconf.get('jwt_secret'));
     return res.status(200).json({
       success: true,
@@ -60,7 +58,32 @@ const login = (req, res, next) => {
   })(req, res, next);
 };
 
+const update = (req, res, next) => {
+  const session = getSession(req);
+  const { id } = req.user;
+  const params = _.extend(req.body, { id });
+  session.run(Users.update(id, params), params)
+    .then((updated) => {
+      const updatedUser = updated.records[0].get('user');
+      if (updatedUser) {
+        res.status(200).json({
+          message: 'successfully updated',
+          user: new User(updatedUser),
+        });
+      } else {
+        res.status(200).json({
+          message: 'Error with DB connection',
+        });
+        throw newError(400, 'Error with DB connection');
+      }
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
 module.exports = {
   register,
   login,
+  update,
 };
