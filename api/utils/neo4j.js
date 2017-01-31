@@ -28,7 +28,10 @@ const compose = {
     const updateQuery = _.map(_.keys(params), param => `${param}: {${param}}`);
     return `MATCH (${node.name}:${node.label} ${queryParam})
             SET ${node.name} += {${updateQuery}}`;
-  }
+  },
+  relate: (start, end, rel) => (
+    `CREATE (${start.name})-[:${rel}]->(${end.name})`
+  ),
 };
 
 const Users = {
@@ -43,10 +46,21 @@ const Users = {
   ),
 };
 
+const Events = {
+  save: (params, user) => {
+    const eventNode = { name: 'event', label: 'Event' };
+    const userNode = { name: 'user', label: 'User' };
+    return `${compose.match(userNode, { id: user.id })}
+      ${compose.create(eventNode, params)}
+      ${compose.relate(eventNode, userNode, 'BELONGS_TO')} RETURN event`;
+  },
+};
+
 // ref: http://stackoverflow.com/questions/25750016/nested-maps-and-collections-in-neo4j-2
 
 
 module.exports = {
   getSession,
   Users,
+  Events,
 };

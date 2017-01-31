@@ -45,6 +45,12 @@ nconf.env(['PORT', 'NODE_ENV'])
         },
       },
     },
+    events: {
+      title: {
+        minLength: 1,
+        maxLength: 200,
+      },
+    },
   });
 
 module.exports = nconf;
