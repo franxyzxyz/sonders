@@ -22,6 +22,9 @@ const compose = {
     const queryParam = `{${_.map(_.keys(params), param => `${param}: {${param}}`).join(',')}}`;
     return `CREATE (${node.name}:${node.label} ${queryParam}) `;
   },
+  matchRel: (start, end, rel, startParams, endParams) => {
+    return `MATCH (${start.name}:${start.label} ${startParams})-[${rel.name}:${rel.label}]->(${end.name}:${end.label} ${endParams}) `;
+  },
   merge: (node, id, params) => {
     const queryParam = '{ id: {id} }';
     // const queryParam = `{${_.map(_.keys(params), param => `${param}: {${param}}`).join(',')}}`;
@@ -54,10 +57,13 @@ const Events = {
       ${compose.create(eventNode, params)}
       ${compose.relate(eventNode, userNode, 'BELONGS_TO')} RETURN event`;
   },
+  delete: (eventParams, userParams, names) => (
+    `${compose.matchRel({ name: names.event, label: 'Event'}, { name: names.user, label: 'User'}, { name: names.rel, label: 'BELONGS_TO' }, eventParams, userParams)}
+    WITH ${names.event}, ${names.event}.id AS event_id DETACH DELETE ${names.event} RETURN event_id`
+  )
 };
 
 // ref: http://stackoverflow.com/questions/25750016/nested-maps-and-collections-in-neo4j-2
-
 
 module.exports = {
   getSession,

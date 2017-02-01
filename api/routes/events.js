@@ -33,4 +33,7 @@ const NEW_SCHEMA = {
 router.route('/event')
   .post(schemaValidator(NEW_SCHEMA), Events.add);
 
+router.route('/event/:event_id')
+  .delete(Events.deleteEvent);
+
 module.exports = router;

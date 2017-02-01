@@ -27,6 +27,43 @@ const add = (req, res, next) => {
     });
 };
 
+const deleteEvent = (req, res, next) => {
+  const session = getSession(req);
+  const params = {
+    event_id: req.params.event_id,
+    user_id: req.user.id,
+  };
+  const names = {
+    event: 'event',
+    user: 'user',
+    rel: 'r',
+  };
+  const eventParams = '{ id: {event_id} }';
+  const userParams = '{ id: {user_id} }';
+
+  return session.run(Events.delete(eventParams, userParams, names), params)
+    .then((results) => {
+      if (_.isEmpty(results.records)) {
+        throw newError(404, 'Unauthorized action');
+      }
+      const deletedEvent = results.records[0].get('event_id');
+      if (deletedEvent) {
+        res.status(200).json({
+          message: 'event successfully deleted',
+        });
+      } else {
+        res.status(200).json({
+          message: 'Error with DB connection',
+        });
+        throw newError(400, 'Error with DB connection');
+      }
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
 module.exports = {
   add,
+  deleteEvent,
 };
