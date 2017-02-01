@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import uuid from 'uuid';
 
 import { getSession, Events } from '../utils/neo4j';
 import { newError } from '../utils/errorHandler';
@@ -6,8 +7,18 @@ import { Event } from './neo4j/event';
 
 const add = (req, res, next) => {
   const session = getSession(req);
-  const params = _.extend(req.body, { id: req.user.id });
-  return session.run(Events.save(req.body, req.user), params)
+  const eventId = uuid.v4();
+  const params = _.assign({}, req.body, {
+    user_id: req.user.id,
+    event_id: eventId,
+  });
+  const names = {
+    event: 'event',
+    user: 'user',
+  };
+  const userParams = { id: 'user_id' };
+  const eventParams = { id: 'event_id' };
+  return session.run(Events.save(req.body, userParams, names, eventParams), params)
     .then((results) => {
       const returnUser = results.records[0].get('event');
       if (returnUser) {
@@ -63,7 +74,46 @@ const deleteEvent = (req, res, next) => {
     });
 };
 
+const update = (req, res, next) => {
+  const session = getSession(req);
+  // const { id } = req.params.event_id;
+  // const params = _.extend(req.body, { id });
+  const params = _.assign({}, {
+    event_id: req.params.event_id,
+    user_id: req.user.id,
+  }, req.body);
+  const names = {
+    event: 'event',
+    user: 'user',
+    rel: 'r',
+  };
+  const eventParams = { id: 'event_id' };
+  const userParams = { id: 'user_id' };
+  session.run(Events.update(eventParams, userParams, names, req.body), params)
+    .then((updated) => {
+      if (_.isEmpty(updated.records)) {
+        throw newError(404, 'Unauthorized action');
+      }
+      const updatedEvent = updated.records[0].get(names.event);
+      if (updatedEvent) {
+        res.status(200).json({
+          message: 'successfully updated',
+          event: new Event(updatedEvent),
+        });
+      } else {
+        res.status(200).json({
+          message: 'Error with DB connection',
+        });
+        throw newError(400, 'Error with DB connection');
+      }
+    })
+    .catch((err) => {
+      next(err);
+    });
+}
+
 module.exports = {
   add,
   deleteEvent,
+  update,
 };

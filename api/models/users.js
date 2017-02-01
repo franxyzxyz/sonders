@@ -62,7 +62,7 @@ const update = (req, res, next) => {
   const session = getSession(req);
   const { id } = req.user;
   const params = _.extend(req.body, { id });
-  session.run(Users.update(id, params), params)
+  session.run(Users.update(params), params)
     .then((updated) => {
       const updatedUser = updated.records[0].get('user');
       if (updatedUser) {
