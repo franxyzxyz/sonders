@@ -17,9 +17,11 @@ nconf.env(['PORT', 'NODE_ENV'])
     jwt_secret: process.env.JWT_SECRET,
     neo4j: 'local',
     'neo4j-local': 'bolt://localhost:7687',
-    'neo4j-remote': 'bolt://hobby-mejhniliojekgbkeamlhjool.dbs.graphenedb.com:24786',
+    'neo4j-remote': process.env.NEO4JREMOTE,
     base_url: 'http://localhost:3000',
     api_path: '/api/v0',
+    CLOUDINARY_URL: process.env.CLOUDINARY_URL,
+    image_base: process.env.CLOUDINARY_ACCESS,
     users: {
       name: {
         minLength: 1,
@@ -49,6 +51,11 @@ nconf.env(['PORT', 'NODE_ENV'])
       title: {
         minLength: 1,
         maxLength: 200,
+      },
+    },
+    media: {
+      image: {
+        maxLength: 1000000,
       },
     },
   });
