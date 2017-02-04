@@ -80,6 +80,15 @@ const User = (_node) => {
   return _.extend(this, user);
 };
 
+const PublicUser = (_node) => {
+  const field = _.chain(REGISTER_SCHEMA.properties).keys().concat('id').value();
+  const user = _.chain(_node.properties)
+                .pick(field)
+                .omit(['password', 'username'])
+                .value();
+  return _.extend(this, user);
+};
+
 const SessionUser = (_node) => {
   const { id, username } = _node.properties;
   return _.extend(this, {
@@ -90,6 +99,7 @@ const SessionUser = (_node) => {
 
 module.exports = {
   User,
+  PublicUser,
   SessionUser,
   REGISTER_SCHEMA,
   LOGIN_SCHEMA,

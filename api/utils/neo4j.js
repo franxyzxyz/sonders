@@ -18,6 +18,11 @@ const compose = {
     const queryParam = `{${_.map(_.keys(params), param => `${param}: {${param}}`).join(',')}}`;
     return `MATCH (${node.name}:${node.label} ${queryParam}) `;
   },
+  matchNode: (matchingNode, matchingParam, startNode, startParam, rel) => {
+    const matchingQuery = _.isEmpty(matchingParam) ? '' : `{${_.map(_.keys(matchingParam), param => `${param}: {${matchingParam[param]}}`).join(',')}}`;
+    const startQuery = `{${_.map(_.keys(startParam), param => `${param}: {${startParam[param]}}`).join(',')}}`;
+    return `MATCH (${matchingNode.name}:${matchingNode.label} ${matchingQuery})-[${rel.name}:${rel.label}]->(${startNode.name}:${startNode.label} ${startQuery}) `;
+  },
   matchAs: (node, params) => {
     const queryParam = `{${_.map(_.keys(params), param => `${param}: {${params[param]}}`).join(',')}}`;
     return `MATCH (${node.name}:${node.label} ${queryParam}) `;
@@ -68,6 +73,13 @@ const Users = {
 };
 
 const Events = {
+  read: params => (
+    `${compose.match({ name: 'event', label: 'Event' }, params)} RETURN event`
+  ),
+  readAll: userParams => (
+    `${compose.matchNode({ name: 'event', label: 'Event' }, {}, { name: 'user', label: 'User' }, userParams, { name: 'r', label: 'BELONGS_TO'})}
+    RETURN event`
+  ),
   save: (eventParams, userParams, names, eventMappedProp) => {
     const eventNode = { name: names.event, label: 'Event' };
     const userNode = { name: names.user, label: 'User' };
@@ -76,13 +88,13 @@ const Events = {
       ${compose.relate(eventNode, userNode, 'BELONGS_TO')} RETURN ${names.event}`;
   },
   delete: (eventParams, userParams, names) => (
-    `${compose.matchRel({ name: names.event, label: 'Event'}, { name: names.user, label: 'User'}, { name: names.rel, label: 'BELONGS_TO' }, eventParams, userParams)}
+    `${compose.matchRel({ name: names.event, label: 'Event' }, { name: names.user, label: 'User' }, { name: names.rel, label: 'BELONGS_TO' }, eventParams, userParams)}
     WITH ${names.event}, ${names.event}.id AS event_id DETACH DELETE ${names.event} RETURN event_id`
   ),
-  update: (eventParams, userParams, names, newParams) => {
-    return `${compose.matchRe({ name: names.event, label: 'Event' }, { name: names.user, label: 'User' }, { name: names.rel, label: 'BELONGS_TO' }, eventParams, userParams)}
+  update: (eventParams, userParams, names, newParams) => (
+    `${compose.matchRe({ name: names.event, label: 'Event' }, { name: names.user, label: 'User' }, { name: names.rel, label: 'BELONGS_TO' }, eventParams, userParams)}
     ${compose.onMatchSet({ name: names.event, label: 'Event', item: eventParams.id }, newParams)} RETURN ${names.event}`
-  }
+  ),
 };
 
 // ref: http://stackoverflow.com/questions/25750016/nested-maps-and-collections-in-neo4j-2

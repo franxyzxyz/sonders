@@ -5,7 +5,9 @@ import jwt from 'jsonwebtoken';
 import nconf from '../config';
 import { getSession, Users } from '../utils/neo4j';
 import { newError } from '../utils/errorHandler';
-import { User, SessionUser } from './neo4j/user';
+import { imageUpload } from '../utils/imageUpload';
+
+import { PublicUser, User, SessionUser } from './neo4j/user';
 
 /**
 * @swagger
@@ -64,6 +66,9 @@ const update = (req, res, next) => {
   const params = _.extend(req.body, { id });
   session.run(Users.update(params), params)
     .then((updated) => {
+      if (!updated.records[0]) {
+        throw newError(404, 'Unable to update');
+      }
       const updatedUser = updated.records[0].get('user');
       if (updatedUser) {
         res.status(200).json({
@@ -71,9 +76,29 @@ const update = (req, res, next) => {
           user: new User(updatedUser),
         });
       } else {
+        throw newError(400, 'Error with DB connection');
+      }
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+const read = (req, res, next) => {
+  const session = getSession(req);
+  const params = { id: req.params.user_id };
+  return session.run(Users.read(params), params)
+    .then((results) => {
+      if (!results.records[0]) {
+        throw newError(404, 'User not found');
+      }
+      const returnUser = results.records[0].get('user');
+      if (returnUser) {
         res.status(200).json({
-          message: 'Error with DB connection',
+          message: 'user found',
+          user: new PublicUser(returnUser),
         });
+      } else {
         throw newError(400, 'Error with DB connection');
       }
     })
@@ -83,6 +108,7 @@ const update = (req, res, next) => {
 };
 
 module.exports = {
+  read,
   register,
   login,
   update,

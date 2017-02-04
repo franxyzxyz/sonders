@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Users from '../models/users';
+import Events from '../models/events';
 import nconf from '../config';
 import { schemaValidator } from '../utils/validation';
 import { location, industry } from '../utils/users';
@@ -74,6 +75,21 @@ const UPDATE_SCHEMA = {
   properties: REGISTER_SCHEMA.properties,
 };
 
+const UPLOAD_IMAGE = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    imageData: {
+      type: 'string',
+      maxLength: nconf.get('media').image.maxLength,
+    },
+    mediaSource: {
+      type: 'string',
+      enum: ['event', 'user', 'story'],
+    },
+  },
+  required: ['imageData', 'mediaSource'],
+};
 router.route('/login')
   .post(schemaValidator(LOGIN_SCHEMA), Users.login);
 
@@ -82,5 +98,14 @@ router.route('/register')
 
 router.route('/user')
   .patch(schemaValidator(UPDATE_SCHEMA), Users.update);
+
+// router.route('/user/search')
+//   .get(Users.searchUsers);
+
+router.route('/user/:user_id')
+  .get(Users.read);
+
+router.route('/user/:user_id/events')
+  .get(Events.readAll);
 
 module.exports = router;
