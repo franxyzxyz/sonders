@@ -21,8 +21,8 @@ const readAll = (req, res, next) => {
         events,
       });
     })
-    .catch((err) => {
-      next(err);
+    .catch(() => {
+      next(newError(400, 'Error with DB connection'));
     });
 };
 
@@ -40,8 +40,8 @@ const read = (req, res, next) => {
         event: new Event(returnEvent),
       });
     })
-    .catch((err) => {
-      next(err);
+    .catch(() => {
+      next(newError(400, 'Error with DB connection'));
     });
 };
 
@@ -95,8 +95,8 @@ const add = (req, res, next) => {
             });
         });
     })
-    .catch((err) => {
-      next(err);
+    .catch(() => {
+      next(newError(400, 'Error with image upload'));
     });
 };
 
@@ -120,19 +120,24 @@ const deleteEvent = (req, res, next) => {
         throw newError(404, 'Unauthorized action');
       }
       const deletedEvent = results.records[0].get('event_id');
+
       if (deletedEvent) {
-        res.status(200).json({
-          message: 'event successfully deleted',
+        const deletedEventImage = results.records[0].get('image');
+        deleteImage(deletedEventImage)
+        .then(() => {
+          res.status(200).json({
+            message: 'event successfully deleted and deleted associated image',
+          });
+        })
+        .catch(() => {
+          throw newError(400, 'Error with DB connection');
         });
       } else {
-        res.status(200).json({
-          message: 'Error with DB connection',
-        });
         throw newError(400, 'Error with DB connection');
       }
     })
-    .catch((err) => {
-      next(err);
+    .catch(() => {
+      next(newError(400, 'Error with DB connection'));
     });
 };
 
@@ -167,8 +172,8 @@ const update = (req, res, next) => {
         throw newError(400, 'Error with DB connection');
       }
     })
-    .catch((err) => {
-      next(err);
+    .catch(() => {
+      next(newError(400, 'Error with DB connection'));
     });
 };
 
