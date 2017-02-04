@@ -4,10 +4,14 @@ import uuid from 'uuid';
 import nconf from '../config';
 import { newError } from './errorHandler';
 
+cloudinary.config(nconf.get('CLOUDINARY_URL'));
+
 const imageUpload = params => (
   new Promise((resolve, reject) => {
     const { imageData, userId, mediaSrc } = params;
-    cloudinary.config(nconf.get('CLOUDINARY_URL'));
+    if (!imageData) {
+      resolve({});
+    }
     const imageId = uuid.v4();
     cloudinary.uploader.upload(imageData, {
       tags: userId,
@@ -35,6 +39,22 @@ const imageUpload = params => (
   })
 );
 
+const deleteImage = publidId => (
+  new Promise((resolve, reject) => {
+    cloudinary.uploader.destroy(publidId)
+      .then(() => {
+        // { result: 'ok' }
+        resolve({
+          delete: 'success',
+        });
+      })
+      .catch(() => {
+        reject(newError(400, 'Error during image deletion'));
+      });
+  })
+);
+
 module.exports = {
   imageUpload,
+  deleteImage,
 };

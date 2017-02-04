@@ -3,6 +3,7 @@ import uuid from 'uuid';
 
 import { getSession, Events } from '../utils/neo4j';
 import { newError } from '../utils/errorHandler';
+import { imageUpload, deleteImage } from '../utils/imageUpload';
 import { Event } from './neo4j/event';
 
 const readAll = (req, res, next) => {
@@ -41,37 +42,58 @@ const read = (req, res, next) => {
     })
     .catch((err) => {
       next(err);
-    })
-
-}
+    });
+};
 
 const add = (req, res, next) => {
   const session = getSession(req);
   const eventId = uuid.v4();
-  const params = _.assign({}, req.body, {
-    user_id: req.user.id,
-    event_id: eventId,
-  });
   const names = {
     event: 'event',
     user: 'user',
   };
-  const userParams = { id: 'user_id' };
-  const eventParams = { id: 'event_id' };
-  return session.run(Events.save(req.body, userParams, names, eventParams), params)
-    .then((results) => {
-      const returnUser = results.records[0].get('event');
-      if (returnUser) {
-        res.status(200).json({
-          message: 'event successfully added',
-          event: new Event(returnUser),
+  const imageParams = {
+    imageData: req.body.imageData,
+    userId: req.user.id,
+    mediaSrc: 'event',
+  };
+
+  imageUpload(imageParams)
+    .then((imageResult) => {
+      const { fullId } = imageResult;
+      const newEventParam = _.chain(req.body).omit('imageData').extend({ image: fullId }).value();
+      const params = _.assign({}, newEventParam, {
+        user_id: req.user.id,
+        event_id: eventId,
+        image: fullId,
+      });
+      const userParams = { id: 'user_id' };
+      const eventParams = { id: 'event_id' };
+      return session.run(Events.save(newEventParam, userParams, names, eventParams), params)
+        .then((results) => {
+          const returnUser = results.records[0].get('event');
+          if (returnUser) {
+            res.status(200).json({
+              message: 'event successfully added',
+              event: new Event(returnUser),
+            });
+          } else {
+            res.status(503).json({
+              message: 'Error with DB connection',
+            });
+            throw newError(400, 'Error with DB connection');
+          }
+        })
+        .catch(() => {
+          // actually upload was successful, either delete the image or keep the image url;
+          deleteImage(fullId)
+            .then(() => {
+              next(newError(400, 'Error with DB connection and deleted Image'));
+            })
+            .catch(() => {
+              throw newError(400, 'Error with DB connection');
+            });
         });
-      } else {
-        res.status(503).json({
-          message: 'Error with DB connection',
-        });
-        throw newError(400, 'Error with DB connection');
-      }
     })
     .catch((err) => {
       next(err);

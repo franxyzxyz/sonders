@@ -25,12 +25,9 @@ const NEW_SCHEMA = {
       type: 'string',
       format: 'date-time',
     },
-    images: {
-      type: 'array',
-      items: {
-        type: 'string',
-        maxLength: 500,
-      },
+    imageData: {
+      type: 'string',
+      maxLength: nconf.get('media').image.maxLength,
     },
   },
   required: ['title', 'type', 'date'],
