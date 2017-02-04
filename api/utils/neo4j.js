@@ -89,7 +89,7 @@ const Events = {
   },
   delete: (eventParams, userParams, names) => (
     `${compose.matchRel({ name: names.event, label: 'Event' }, { name: names.user, label: 'User' }, { name: names.rel, label: 'BELONGS_TO' }, eventParams, userParams)}
-    WITH ${names.event}, ${names.event}.id AS event_id DETACH DELETE ${names.event} RETURN event_id`
+    WITH ${names.event}, ${names.event}.id AS event_id, ${names.event}.image AS image DETACH DELETE ${names.event} RETURN event_id, image`
   ),
   update: (eventParams, userParams, names, newParams) => (
     `${compose.matchRe({ name: names.event, label: 'Event' }, { name: names.user, label: 'User' }, { name: names.rel, label: 'BELONGS_TO' }, eventParams, userParams)}

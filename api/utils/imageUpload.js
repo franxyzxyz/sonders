@@ -41,6 +41,9 @@ const imageUpload = params => (
 
 const deleteImage = publidId => (
   new Promise((resolve, reject) => {
+    if (!publidId) {
+      resolve({});
+    }
     cloudinary.uploader.destroy(publidId)
       .then(() => {
         // { result: 'ok' }
