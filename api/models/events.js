@@ -5,6 +5,46 @@ import { getSession, Events } from '../utils/neo4j';
 import { newError } from '../utils/errorHandler';
 import { Event } from './neo4j/event';
 
+const readAll = (req, res, next) => {
+  const session = getSession(req);
+  const userId = req.params.user_id ? req.params.user_id : req.user.id;
+  const userParams = { id: 'user_id' };
+  return session.run(Events.readAll(userParams), { user_id: userId })
+    .then((results) => {
+      if (_.isEmpty(results.records)) {
+        throw newError(404, 'No events found');
+      }
+      const events = _.map(results.records, record => new Event(record.get('event')));
+      res.status(200).json({
+        message: 'events found',
+        events,
+      });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+const read = (req, res, next) => {
+  const session = getSession(req);
+  const params = { id: req.params.event_id };
+  return session.run(Events.read(params), params)
+    .then((results) => {
+      if (_.isEmpty(results.records)) {
+        throw newError(404, 'No events found');
+      }
+      const returnEvent = results.records[0].get('event');
+      res.status(200).json({
+        message: 'event found',
+        event: new Event(returnEvent),
+      });
+    })
+    .catch((err) => {
+      next(err);
+    })
+
+}
+
 const add = (req, res, next) => {
   const session = getSession(req);
   const eventId = uuid.v4();
@@ -27,7 +67,7 @@ const add = (req, res, next) => {
           event: new Event(returnUser),
         });
       } else {
-        res.status(200).json({
+        res.status(503).json({
           message: 'Error with DB connection',
         });
         throw newError(400, 'Error with DB connection');
@@ -76,8 +116,6 @@ const deleteEvent = (req, res, next) => {
 
 const update = (req, res, next) => {
   const session = getSession(req);
-  // const { id } = req.params.event_id;
-  // const params = _.extend(req.body, { id });
   const params = _.assign({}, {
     event_id: req.params.event_id,
     user_id: req.user.id,
@@ -110,9 +148,11 @@ const update = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
-}
+};
 
 module.exports = {
+  readAll,
+  read,
   add,
   deleteEvent,
   update,

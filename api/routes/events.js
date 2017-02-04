@@ -25,6 +25,13 @@ const NEW_SCHEMA = {
       type: 'string',
       format: 'date-time',
     },
+    images: {
+      type: 'array',
+      items: {
+        type: 'string',
+        maxLength: 500,
+      },
+    },
   },
   required: ['title', 'type', 'date'],
 };
@@ -35,11 +42,13 @@ const UPDATE_SCHEMA = {
   properties: NEW_SCHEMA.properties,
 };
 
-router.route('/event')
+router.route('/event/self')
+  .get(Events.readAll)
   .post(schemaValidator(NEW_SCHEMA), Events.add);
 
 router.route('/event/:event_id')
-  .patch(Events.update)
+  .get(Events.read)
+  .patch(schemaValidator(UPDATE_SCHEMA), Events.update)
   .delete(Events.deleteEvent);
 
 module.exports = router;
