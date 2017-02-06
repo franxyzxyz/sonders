@@ -142,6 +142,9 @@ const deleteEvent = (req, res, next) => {
 };
 
 const update = (req, res, next) => {
+  if (_.isEmpty(req.body)) {
+    throw newError(404, 'request body must at least contain one prop');
+  }
   const session = getSession(req);
   const params = _.assign({}, {
     event_id: req.params.event_id,
@@ -177,10 +180,71 @@ const update = (req, res, next) => {
     ));
 };
 
+const updateImage = (req, res, next) => {
+  const session = getSession(req);
+  const eventParams = { id: 'event_id' };
+  const userParams = { id: 'user_id' };
+  const params = {
+    event_id: req.params.event_id,
+    user_id: req.user.id,
+    image: '',
+  };
+  const newParams = { image: '' };
+  const names = {
+    event: 'event',
+    user: 'user',
+    rel: 'r',
+  };
+  const imageParams = {
+    imageData: req.body.imageData,
+    userId: req.user.id,
+    mediaSrc: 'event',
+  };
+  imageUpload(imageParams)
+    .then((imageResult) => {
+      if (!_.isEmpty(imageResult)) {
+        const { fullId } = imageResult;
+        params.image = fullId;
+        newParams.image = fullId;
+      }
+
+      session.run(Events.updateReturnOrg(eventParams, userParams, names, newParams), params)
+      .then((updated) => {
+        if (_.isEmpty(updated.records)) {
+          throw newError(404, 'Unauthorized action');
+        }
+        const updatedEvent = updated.records[0].get(names.event);
+        const imageToBeDeleted = updated.records[0].get('orgImage');
+        deleteImage(imageToBeDeleted)
+        .then((result) => {
+          if (result.delete && updatedEvent) {
+            res.status(200).json({
+              message: 'successfully updated with image updated',
+              event: new Event(updatedEvent),
+            });
+          } else {
+            res.status(200).json({
+              message: 'successfully updated with no image removed',
+              event: new Event(updatedEvent),
+            });
+          }
+        })
+        .catch(() => {
+          throw newError(403, 'Successfully updated but unable to delete image resource');
+        });
+      })
+      .catch(err => (
+        next(dbError(err))
+      ));
+    })
+
+};
+
 module.exports = {
   readAll,
   read,
   add,
   deleteEvent,
   update,
+  updateImage,
 };

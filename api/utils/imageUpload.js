@@ -48,7 +48,7 @@ const deleteImage = publidId => (
       .then(() => {
         // { result: 'ok' }
         resolve({
-          delete: 'success',
+          delete: true,
         });
       })
       .catch(() => {

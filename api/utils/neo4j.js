@@ -95,6 +95,11 @@ const Events = {
     `${compose.matchRe({ name: names.event, label: 'Event' }, { name: names.user, label: 'User' }, { name: names.rel, label: 'BELONGS_TO' }, eventParams, userParams)}
     ${compose.onMatchSet({ name: names.event, label: 'Event', item: eventParams.id }, newParams)} RETURN ${names.event}`
   ),
+  updateReturnOrg: (eventParams, userParams, names, newParams) => (
+    `${compose.matchRe({ name: names.event, label: 'Event' }, { name: names.user, label: 'User' }, { name: names.rel, label: 'BELONGS_TO' }, eventParams, userParams)}
+    WITH ${names.event}, ${names.event}.image AS orgImage
+    ${compose.onMatchSet({ name: names.event, label: 'Event', item: eventParams.id }, newParams)} RETURN ${names.event}, orgImage`
+  ),
 };
 
 // ref: http://stackoverflow.com/questions/25750016/nested-maps-and-collections-in-neo4j-2

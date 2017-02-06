@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import _ from 'lodash';
 import Events from '../models/events';
 import nconf from '../config';
 import { schemaValidator } from '../utils/validation';
@@ -36,7 +37,19 @@ const NEW_SCHEMA = {
 const UPDATE_SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  properties: NEW_SCHEMA.properties,
+  properties: _.omit(NEW_SCHEMA.properties, 'imageData'),
+};
+
+const UPDATE_IMAGE_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    imageData: {
+      type: 'string',
+      maxLength: nconf.get('media').image.maxLength,
+    },
+  },
+  required: ['imageData'],
 };
 
 router.route('/event/self')
@@ -47,5 +60,8 @@ router.route('/event/:event_id')
   .get(Events.read)
   .patch(schemaValidator(UPDATE_SCHEMA), Events.update)
   .delete(Events.deleteEvent);
+
+router.route('/event/:event_id/image')
+  .patch(schemaValidator(UPDATE_IMAGE_SCHEMA), Events.updateImage);
 
 module.exports = router;
