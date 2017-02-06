@@ -2,7 +2,7 @@ import _ from 'lodash';
 import uuid from 'uuid';
 
 import { getSession, Events } from '../utils/neo4j';
-import { newError } from '../utils/errorHandler';
+import { newError, dbError } from '../utils/errorHandler';
 import { imageUpload, deleteImage } from '../utils/imageUpload';
 import { Event } from './neo4j/event';
 
@@ -21,9 +21,9 @@ const readAll = (req, res, next) => {
         events,
       });
     })
-    .catch(() => {
-      next(newError(400, 'Error with DB connection'));
-    });
+    .catch(err => (
+      next(dbError(err))
+    ));
 };
 
 const read = (req, res, next) => {
@@ -40,9 +40,9 @@ const read = (req, res, next) => {
         event: new Event(returnEvent),
       });
     })
-    .catch(() => {
-      next(newError(400, 'Error with DB connection'));
-    });
+    .catch(err => (
+      next(dbError(err))
+    ));
 };
 
 const add = (req, res, next) => {
@@ -95,9 +95,9 @@ const add = (req, res, next) => {
             });
         });
     })
-    .catch(() => {
-      next(newError(400, 'Error with image upload'));
-    });
+    .catch(err => (
+      next(dbError(err))
+    ));
 };
 
 const deleteEvent = (req, res, next) => {
@@ -136,9 +136,9 @@ const deleteEvent = (req, res, next) => {
         throw newError(400, 'Error with DB connection');
       }
     })
-    .catch(() => {
-      next(newError(400, 'Error with DB connection'));
-    });
+    .catch(err => (
+      next(dbError(err))
+    ));
 };
 
 const update = (req, res, next) => {
@@ -172,9 +172,9 @@ const update = (req, res, next) => {
         throw newError(400, 'Error with DB connection');
       }
     })
-    .catch(() => {
-      next(newError(400, 'Error with DB connection'));
-    });
+    .catch(err => (
+      next(dbError(err))
+    ));
 };
 
 module.exports = {

@@ -4,8 +4,7 @@ import jwt from 'jsonwebtoken';
 
 import nconf from '../config';
 import { getSession, Users } from '../utils/neo4j';
-import { newError } from '../utils/errorHandler';
-import { imageUpload } from '../utils/imageUpload';
+import { newError, dbError } from '../utils/errorHandler';
 
 import { PublicUser, User, SessionUser } from './neo4j/user';
 
@@ -30,7 +29,7 @@ const register = (req, res, next) => {
         throw newError(400, 'username already in use');
       } else {
         return passport.authenticate('local-signup', (err, user, status) => {
-          if (err || !user) throw new Error({ message: status.message, status: 400 });
+          if (err || !user) throw newError(400, status.message);
           return res.status(200).json({
             success: true,
             user: new User(user),
@@ -39,9 +38,9 @@ const register = (req, res, next) => {
         })(req, res, next);
       }
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(err => (
+      next(dbError(err))
+    ));
 };
 
 const login = (req, res, next) => {
@@ -79,9 +78,9 @@ const update = (req, res, next) => {
         throw newError(400, 'Error with DB connection');
       }
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(err => (
+      next(dbError(err))
+    ));
 };
 
 const read = (req, res, next) => {
@@ -102,9 +101,9 @@ const read = (req, res, next) => {
         throw newError(400, 'Error with DB connection');
       }
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(err => (
+      next(dbError(err))
+    ));
 };
 
 module.exports = {
