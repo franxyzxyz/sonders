@@ -77,7 +77,7 @@ const Events = {
     `${compose.match({ name: 'event', label: 'Event' }, params)} RETURN event`
   ),
   readAll: userParams => (
-    `${compose.matchNode({ name: 'event', label: 'Event' }, {}, { name: 'user', label: 'User' }, userParams, { name: 'r', label: 'BELONGS_TO'})}
+    `${compose.matchNode({ name: 'user', label: 'User' }, userParams, { name: 'event', label: 'Event' }, {}, { name: 'r', label: 'OWNS' })}
     RETURN event`
   ),
   save: (eventParams, userParams, names, eventMappedProp) => {
@@ -85,18 +85,18 @@ const Events = {
     const userNode = { name: names.user, label: 'User' };
     return `${compose.matchAs(userNode, userParams)}
       ${compose.createAs(eventNode, eventParams, eventMappedProp)}
-      ${compose.relate(eventNode, userNode, 'BELONGS_TO')} RETURN ${names.event}`;
+      ${compose.relate(userNode, eventNode, 'OWNS')} RETURN ${names.event}`;
   },
   delete: (eventParams, userParams, names) => (
-    `${compose.matchRel({ name: names.event, label: 'Event' }, { name: names.user, label: 'User' }, { name: names.rel, label: 'BELONGS_TO' }, eventParams, userParams)}
+    `${compose.matchRel({ name: names.user, label: 'User' }, { name: names.event, label: 'Event' }, { name: names.rel, label: 'OWNS' }, userParams, eventParams)}
     WITH ${names.event}, ${names.event}.id AS event_id, ${names.event}.image AS image DETACH DELETE ${names.event} RETURN event_id, image`
   ),
   update: (eventParams, userParams, names, newParams) => (
-    `${compose.matchRe({ name: names.event, label: 'Event' }, { name: names.user, label: 'User' }, { name: names.rel, label: 'BELONGS_TO' }, eventParams, userParams)}
+    `${compose.matchRe({ name: names.user, label: 'User' }, { name: names.event, label: 'Event' }, { name: names.rel, label: 'OWNS' }, userParams, eventParams)}
     ${compose.onMatchSet({ name: names.event, label: 'Event', item: eventParams.id }, newParams)} RETURN ${names.event}`
   ),
   updateReturnOrg: (eventParams, userParams, names, newParams) => (
-    `${compose.matchRe({ name: names.event, label: 'Event' }, { name: names.user, label: 'User' }, { name: names.rel, label: 'BELONGS_TO' }, eventParams, userParams)}
+    `${compose.matchRe({ name: names.user, label: 'User' }, { name: names.event, label: 'Event' }, { name: names.rel, label: 'OWNS' }, userParams, eventParams)}
     WITH ${names.event}, ${names.event}.image AS orgImage
     ${compose.onMatchSet({ name: names.event, label: 'Event', item: eventParams.id }, newParams)} RETURN ${names.event}, orgImage`
   ),
