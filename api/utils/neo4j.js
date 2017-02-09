@@ -58,6 +58,9 @@ const compose = {
   relate: (start, end, rel) => (
     `CREATE (${start.name})-[:${rel}]->(${end.name})`
   ),
+  relateAs: (start, end, rel) => (
+    `CREATE (${start.name})-[${rel.name}:${rel.label}]->(${end.name})`
+  )
 };
 
 const Users = {
@@ -114,6 +117,35 @@ const Stories = {
     `${compose.matchRel({ name: names.user, label: 'User' }, { name: names.story, label: 'Story' }, { name: names.rel, label: 'OWNS' }, userParams, storyParams)}
     WITH ${names.story}, ${names.story}.id AS story_id DETACH DELETE ${names.story} RETURN story_id`
   ),
+  read: params => (
+    `${compose.match({ name: 'story', label: 'Story' }, params)} RETURN story`
+  ),
+  update: (storyParams, userParams, names, newParams) => (
+    `${compose.matchRe({ name: names.user, label: 'User' }, { name: names.story, label: 'Story' }, { name: names.rel, label: 'OWNS' }, userParams, storyParams)}
+    ${compose.onMatchSet({ name: names.story, label: 'Story', item: storyParams.id }, newParams)} RETURN ${names.story}`
+  ),
+  readAll: userParams => (
+    `${compose.matchNode({ name: 'user', label: 'User' }, userParams, { name: 'story', label: 'Story' }, {}, { name: 'r', label: 'OWNS' })}
+    RETURN story`
+  ),
+  linkOwn: (storyParams, linkToNode, linkToNodeParams, userParams, names) => {
+    const userNode = { name: names.user, label: 'User' };
+    const storyNode = { name: names.story, label: 'Story' };
+    return `${compose.matchRe(userNode, storyNode, { label: 'OWNS' }, userParams, storyParams)}
+    WITH ${names.story}
+    ${compose.matchRe(userNode, linkToNode, { label: 'OWNS' }, userParams, linkToNodeParams)}
+    ${compose.relateAs(linkToNode, storyNode, { name: names.rel, label: 'PART_OF'})}
+    RETURN ${names.story}, ${names.linkTo}, ${names.rel}`
+  },
+  detachFrom: (storyParams, linkToNode, linkToNodeParams, userParams, names) => {
+    const userNode = { name: names.user, label: 'User' };
+    const storyNode = { name: names.story, label: 'Story' };
+    return `${compose.matchRe(userNode, storyNode, { label: 'OWNS' }, userParams, storyParams)}
+    WITH ${names.story}
+    ${compose.matchRe(linkToNode, storyNode, { name: names.rel, label: 'PART_OF' }, linkToNodeParams, storyParams)}
+    WITH ${names.rel}, ${names.rel} AS deletedRel DELETE ${names.rel}
+    RETURN ${names.rel}`
+  }
 };
 
 // ref: http://stackoverflow.com/questions/25750016/nested-maps-and-collections-in-neo4j-2
