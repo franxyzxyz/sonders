@@ -6,7 +6,7 @@ import bodyParser from 'body-parser';
 import expressjwt from 'express-jwt';
 import logger from 'morgan';
 import nconf from './config';
-import { users, events, medias } from './routes';
+import { users, events, medias, stories } from './routes';
 
 require('./utils/passport')(passport);
 
@@ -40,8 +40,9 @@ app.use(passport.session());
 api.use(expressjwt({ secret: nconf.get('jwt_secret') }).unless({
   path: [/login/i, /register/i],
 }), users);
-api.use(expressjwt({ secret: nconf.get('jwt_secret') }), events)
-api.use(expressjwt({ secret: nconf.get('jwt_secret') }), medias)
+api.use(expressjwt({ secret: nconf.get('jwt_secret') }), events);
+api.use(expressjwt({ secret: nconf.get('jwt_secret') }), medias);
+api.use(expressjwt({ secret: nconf.get('jwt_secret') }), stories);
 
 api.get('/health', (req, res) => {
   res.status(200).json({

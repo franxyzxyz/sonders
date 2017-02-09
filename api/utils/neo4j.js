@@ -102,10 +102,25 @@ const Events = {
   ),
 };
 
+const Stories = {
+  save: (storyParams, userParams, names, storyMappedProp) => {
+    const storyNode = { name: names.story, label: 'Story' };
+    const userNode = { name: names.user, label: 'User' };
+    return `${compose.matchAs(userNode, userParams)}
+      ${compose.createAs(storyNode, storyParams, storyMappedProp)}
+      ${compose.relate(userNode, storyNode, 'OWNS')} RETURN ${names.story}`;
+  },
+  delete: (storyParams, userParams, names) => (
+    `${compose.matchRel({ name: names.user, label: 'User' }, { name: names.story, label: 'Story' }, { name: names.rel, label: 'OWNS' }, userParams, storyParams)}
+    WITH ${names.story}, ${names.story}.id AS story_id DETACH DELETE ${names.story} RETURN story_id`
+  ),
+};
+
 // ref: http://stackoverflow.com/questions/25750016/nested-maps-and-collections-in-neo4j-2
 
 module.exports = {
   getSession,
   Users,
   Events,
+  Stories,
 };

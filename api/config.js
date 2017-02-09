@@ -58,6 +58,12 @@ nconf.env(['PORT', 'NODE_ENV'])
         maxLength: 1000000,
       },
     },
+    stories: {
+      title: {
+        minLength: 1,
+        maxLength: 200,
+      },
+    },
   });
 
 module.exports = nconf;
