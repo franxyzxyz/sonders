@@ -13,6 +13,14 @@ require('./utils/passport')(passport);
 const app = express();
 const api = express();
 
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', nconf.get('client_url'));
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  next();
+});
+
 app.use(bodyParser.json({ limit: '5mb' }));
 app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
 app.use(logger('dev'));
