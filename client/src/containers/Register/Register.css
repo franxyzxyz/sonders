@@ -1,0 +1,51 @@
+@import '../../utils/styles/global.css';
+
+$radius: 20px;
+
+.wrapper {
+  flex: 1;
+  color: #444;
+  display: flex;
+  justify-content: center;
+  .registerBox {
+    /*border: 2px solid $standout;*/
+    background: #ececec;
+    padding: 30px;
+    align-self: center;
+    /*display: flex;
+    flex-direction: column;*/
+    input {
+      display: block;
+      min-width: 300px;
+      width: 20vw;
+    }
+    .registerTitle {
+      font-weight: 700;
+      text-align: center;
+      padding: $basicPad;
+    }
+    .registerAction {
+      display: flex;
+    }
+    .registerContent {
+      display: flex;
+      flex-direction: column;
+      .error {
+        font-size: 0.9em;
+        color: #999;
+      }
+      .link {
+        display: flex;
+        justify-content: center;
+        height: 15px;
+        div {
+          height: 100%;
+          width: 0;
+          border-left: 1px dashed $theme;
+          border-right: 1px dashed $theme;
+        }
+      }
+    }
+  }
+
+}

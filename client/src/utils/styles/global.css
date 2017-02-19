@@ -1,0 +1,36 @@
+$theme: rgb(255, 191, 0);
+$standout: rgb(255, 215, 3);
+$normalPad: 5px;
+$basicPad: 10px;
+$extraPad: 15px;
+$stdTrans: 0.1s ease-out;
+$basicRadius: 20px;
+$alert: rgb(221, 56, 56);
+
+.basicInput {
+  outline: none;
+  font-family: Karla, sans-serif;
+  border: 0;
+  border-radius: $basicRadius;
+  color: #444;
+  padding: $basicPad;
+  font-size: 1em;
+  text-align: center;
+}
+
+.basicButton {
+  outline: none;
+  cursor: pointer;
+  flex: 1;
+  border: 0;
+  border-radius: $basicRadius;
+  font-size: 1em;
+  color: #fff;
+  font-family: Karla, sans-serif;
+  padding: $normalPad $extraPad;
+  background: $theme;
+  transition: $stdTrans;
+  &:hover {
+    color: #444;
+  }
+}

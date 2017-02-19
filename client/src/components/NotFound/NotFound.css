@@ -1,0 +1,5 @@
+@import '../../utils/styles/global.css';
+
+.title {
+  background: $standout;
+}

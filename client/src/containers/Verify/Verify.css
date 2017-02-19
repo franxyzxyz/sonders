@@ -1,0 +1,74 @@
+@import '../../utils/styles/global.css';
+
+$radius: 20px;
+
+.title {
+  flex: 1;
+  color: #444;
+  display: flex;
+  justify-content: center;
+  .loginBox {
+    /*border: 2px solid $standout;*/
+    background: #ececec;
+    padding: 30px;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    .loginTitle {
+      font-weight: 700;
+      text-align: center;
+      padding: $basicPad;
+      background: $standout;
+    }
+    .loginStatus {
+      margin-bottom: $basicPad;
+      text-align: center;
+    }
+    .loginAction {
+      display: flex;
+      button {
+        outline: none;
+        cursor: pointer;
+        flex: 1;
+        border: 0;
+        border-radius: $radius;
+        font-size: 1em;
+        color: #fff;
+        font-family: Karla;
+        padding: $normalPad $extraPad;
+        background: $theme;
+        transition: $stdTrans;
+        &:hover {
+          color: #444;
+        }
+        /*background-image: radial-gradient(farthest-corner at 50% 50% , rgb(42, 84, 162) 0%, $theme 100%);*/
+      }
+    }
+    .loginContent {
+      display: flex;
+      flex-direction: column;
+      .link {
+        display: flex;
+        justify-content: center;
+        height: 15px;
+        div {
+          height: 100%;
+          width: 0;
+          border-left: 1px dashed $theme;
+          border-right: 1px dashed $theme;
+        }
+      }
+      input {
+        text-align: center;
+        border-radius: $radius;
+        border: 0;
+        color: #444;
+        padding: $basicPad;
+        font-size: 1em;
+        font-family: Karla;
+        outline: none;
+        /*border-bottom: 2px dotted $theme;*/
+      }
+    }
+  }
+}

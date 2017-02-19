@@ -1,0 +1,55 @@
+@import '../../utils/styles/global.css';
+
+.wrapper {
+  flex: 1;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  .resendBox {
+    position: relative;
+    /*border: 2px solid $theme;*/
+    background: #ececec;
+    text-align: center;
+    padding: $extraPad;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    .resent {
+      padding: $extraPad;
+      width: 20vw;
+      min-width: 300px;
+    }
+    .resendTitle {
+      margin: $extraPad 0 $normalPad 0;
+      font-weight: 700;
+    }
+    input {
+      margin: $basicPad 0;
+      width: 20vw;
+      min-width: 300px;
+    }
+    .content {
+      display: flex;
+      flex-direction: column;
+    }
+    .action {
+      margin-top: $basicPad;
+    }
+  }
+  .error {
+    /*margin-top: -10px;*/
+    color: #fff;
+    font-weight: 700;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    font-size: 0.8em;
+    /*background: $theme;*/
+    text-align: center;
+    padding: $normalPad;
+    /*justify-content: center;*/
+    /*border: 1px solid $alert;*/
+    background: $alert;
+  }
+}

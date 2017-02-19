@@ -1,0 +1,50 @@
+@import '../../utils/styles/global.css';
+
+.title {
+  background: $standout;
+}
+
+.nav {
+  display: flex;
+  a {
+    transition: $stdTrans;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .navComponent {
+    margin: 10px;
+    transition: $stdTrans;
+    a {
+      background: $standout;
+      padding: $basicPad;
+      border: 0;
+      font-weight: 700;
+      color: #444;
+      &:hover {
+        color: #fff;
+      }
+    }
+  }
+  .navWrapper {
+    display: flex;
+    flex-direction: row;
+  }
+  .flexDummy {
+    flex: 1;
+  }
+  .logoWrapper {
+    padding: $normalPad;
+    .logo {
+      font-weight: 700;
+      padding: 0 $normalPad;
+      font-size: 2.2em;
+      margin: 0;
+      color: $theme;
+      transition: $stdTrans;
+      &:hover {
+        color: #fff;
+        text-shadow: -1px 0 $theme, 0 1px $theme, 1px 0 $theme, 0 -1px $theme;
+      }
+    }
+  }
+}
