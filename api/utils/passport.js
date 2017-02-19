@@ -32,11 +32,13 @@ module.exports = (passport) => {
     const generated = {
       id: uuid.v4(),
       password: encrypted,
+      verified: false,
     };
     const params = _.chain(req.body)
                     .omit('password')
                     .extend(generated)
                     .value();
+
     return session.run(Users.save(params), params)
     .then((results) => {
       const returnUser = results.records[0].get('user');
@@ -51,6 +53,7 @@ module.exports = (passport) => {
       }
     })
     .catch((err) => {
+      console.log(err)
       done(true, null, {
         message: err,
       });
