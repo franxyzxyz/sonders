@@ -10,6 +10,12 @@ import { newError, dbError } from '../utils/errorHandler';
 
 import { PublicUser, User, SessionUser } from './neo4j/user';
 
+const mg = mailgun({
+  apiKey: nconf.get('MAILGUN_API_KEY'),
+  domain: nconf.get('MAILGUN_DOMAIN'),
+});
+
+
 /**
 * @swagger
 * definitions:
@@ -40,15 +46,13 @@ const register = (req, res, next) => {
       return passport.authenticate('local-signup', (err, user, status) => {
         if (err || !user) throw newError(400, status.message);
         const newUser = new User(user);
-        console.log(newUser)
         const verifyToken = jwt.sign(newUser, nconf.get('verify_secret'), { expiresIn: '1d' });
-        const mg = mailgun({apiKey: nconf.get('MAILGUN_API_KEY'), domain: nconf.get('MAILGUN_DOMAIN')});
 
         const data = {
           from: 'Sonders <account@verify.sonders.co>',
           to: newUser.email,
           subject: 'Please confirm your account',
-          html: `<html><h1>SONDERS</h1><h2>Email address confirmation</h2><p>Thank you for signing up. Please verify your email address by clicking the following link:<a href="http://localhost:3000/api/v0/verify?click=${verifyToken}">CLICK HERE</a></html>`
+          html: `<html><h1>SONDERS</h1><h2>Email address confirmation</h2><p>Thank you for signing up. Please verify your email address by clicking the following link:<a href="${nconf.get('client_url')}/verify?click=${verifyToken}">CLICK HERE</a></html>`
         };
 
         mg.messages().send(data, function (error, body) {
@@ -71,7 +75,13 @@ const register = (req, res, next) => {
 
 const verify = (req, res, next) => {
   const session = getSession(req);
-  const jwt = jwtDecode(req.query.click);
+  let jwt = null;
+  try {
+    jwt = jwtDecode(req.query.click);
+  } catch (err) {
+    next(dbError(newError(400, 'Invalid JWT')));
+    return;
+  }
   if (jwt.exp && !moment(jwt.exp * 1000).isAfter()) {
     next(dbError(newError(403, 'Verification token has expired')));
   }
@@ -100,6 +110,38 @@ const verify = (req, res, next) => {
       next(dbError(err))
     ));
 };
+
+const resendVerification = (req, res, next) => {
+  const { email } = req.body;
+  const session = getSession(req);
+  const params = { email: req.body.email };
+
+  return session.run(Users.read(params), params)
+    .then((results) => {
+      if (_.isEmpty(results.records)) {
+        throw newError(404, 'Email not found');
+      }
+      const userRecord = new User(results.records[0].get('user'));
+      const verifyToken = jwt.sign(userRecord, nconf.get('verify_secret'), { expiresIn: '1d' });
+
+      const data = {
+        from: 'Sonders <account@verify.sonders.co>',
+        to: userRecord.email,
+        subject: 'Please confirm your account',
+        html: `<html><h1>SONDERS</h1><h2>Email address confirmation</h2><p>Thank you for signing up. Please verify your email address by clicking the following link:<a href="${nconf.get('client_url')}/verify?click=${verifyToken}">CLICK HERE</a></html>`
+      };
+      mg.messages().send(data, function (error, body) {
+      });
+      return res.status(200).json({
+        success: true,
+        message: 'Verification code sent'
+      });
+    })
+    .catch((err) => {
+      next(dbError(err))
+    })
+
+}
 
 const login = (req, res, next) => {
   passport.authenticate('local-login', (err, user, status) => {
@@ -164,10 +206,16 @@ const read = (req, res, next) => {
     ));
 };
 
+// const searchUsers = (req, res, next) => {
+//   const { name } = req.query;
+//   console.log(req.query)
+// };
+
 module.exports = {
   read,
   register,
   login,
   update,
   verify,
+  resendVerification,
 };

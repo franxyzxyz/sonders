@@ -90,9 +90,10 @@ const PublicUser = (_node) => {
 };
 
 const SessionUser = (_node) => {
-  const { id, username } = _node.properties;
+  const { id, username, verified } = _node.properties;
   return _.extend(this, {
     id,
+    verified,
     username,
   });
 };

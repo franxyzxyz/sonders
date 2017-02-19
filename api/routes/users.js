@@ -90,6 +90,20 @@ const UPLOAD_IMAGE = {
   },
   required: ['imageData', 'mediaSource'],
 };
+
+const VCODEREQUEST_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    email: {
+      type: 'string',
+      format: 'email',
+      maxLength: config.email.maxLength,
+    },
+  },
+  required: ['email'],
+};
+
 router.route('/login')
   .post(Users.login);
 
@@ -98,6 +112,9 @@ router.route('/register')
 
 router.route('/verify')
   .get(Users.verify);
+
+router.route('/verify/send')
+  .post(schemaValidator(VCODEREQUEST_SCHEMA), Users.resendVerification);
 
 router.route('/user')
   .patch(schemaValidator(UPDATE_SCHEMA), Users.update);
