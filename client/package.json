@@ -1,7 +1,7 @@
 {
-  "name": "beam",
+  "name": "sonders",
   "version": "0.1.0",
-  "description": "reactive react starter kit",
+  "description": "sonders client side",
   "main": "app.js",
   "scripts": {
     "start": "nodemon --ignore src/ app.js --exec babel-node --presets es2015",
