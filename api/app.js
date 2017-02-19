@@ -40,13 +40,13 @@ const swaggerSpec = swaggerJSDoc(options);
 
 app.use(nconf.get('api_path'), api);
 app.set('port', nconf.get('PORT'));
-
 app.use(passport.initialize());
 app.use(passport.session());
 
+
 // API Routes
 api.use(expressjwt({ secret: nconf.get('jwt_secret') }).unless({
-  path: [/login/i, /register/i],
+  path: [/login/i, /register/i, /verify/i],
 }), users);
 api.use(expressjwt({ secret: nconf.get('jwt_secret') }), events);
 api.use(expressjwt({ secret: nconf.get('jwt_secret') }), medias);
@@ -66,6 +66,7 @@ api.get('/swagger.json', (req, res) => {
 
 app.use((err, req, res, next) => {
   if (err) {
+    console.log(err)
     try {
       if (err.name === 'UnauthorizedError') {
         return res.status(err.status).json({

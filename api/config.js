@@ -15,12 +15,16 @@ nconf.env(['PORT', 'NODE_ENV'])
     REMOTE_USERNAME: process.env.NEO4JUSERREMOTE,
     REMOTE_PASSWORD: process.env.NEO4JPWREMOTE,
     jwt_secret: process.env.JWT_SECRET,
+    verify_secret: process.env.VERIFY_SECRET,
     neo4j: 'local',
     'neo4j-local': 'bolt://localhost:7687',
     'neo4j-remote': process.env.NEO4JREMOTE,
     base_url: 'http://localhost:3000',
+    client_url: 'http://localhost:3001',
     api_path: '/api/v0',
     CLOUDINARY_URL: process.env.CLOUDINARY_URL,
+    MAILGUN_API_KEY: process.env.MAILGUN_KEY,
+    MAILGUN_DOMAIN: process.env.MAILGUN_DOMAIN,
     image_base: process.env.CLOUDINARY_ACCESS,
     users: {
       name: {
