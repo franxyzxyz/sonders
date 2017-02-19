@@ -44,7 +44,7 @@ const REGISTER_SCHEMA = {
       },
     },
   },
-  required: ['name', 'username', 'password'],
+  required: ['name', 'username', 'password', 'email'],
 };
 
 const LOGIN_SCHEMA = {

@@ -48,7 +48,7 @@ const REGISTER_SCHEMA = {
       },
     },
   },
-  required: ['name', 'username', 'password'],
+  required: ['name', 'username', 'password', 'email'],
 };
 
 const LOGIN_SCHEMA = {
@@ -91,10 +91,13 @@ const UPLOAD_IMAGE = {
   required: ['imageData', 'mediaSource'],
 };
 router.route('/login')
-  .post(schemaValidator(LOGIN_SCHEMA), Users.login);
+  .post(Users.login);
 
 router.route('/register')
   .post(schemaValidator(REGISTER_SCHEMA), Users.register);
+
+router.route('/verify')
+  .get(Users.verify);
 
 router.route('/user')
   .patch(schemaValidator(UPDATE_SCHEMA), Users.update);
