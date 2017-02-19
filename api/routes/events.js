@@ -22,7 +22,11 @@ const NEW_SCHEMA = {
       uniqueItems: true,
       enum: category,
     },
-    date: {
+    startDate: {
+      type: 'string',
+      format: 'date-time',
+    },
+    endDate: {
       type: 'string',
       format: 'date-time',
     },
@@ -31,7 +35,7 @@ const NEW_SCHEMA = {
       maxLength: nconf.get('media').image.maxLength,
     },
   },
-  required: ['title', 'type', 'date'],
+  required: ['title', 'type', 'startDate', 'endDate'],
 };
 
 const UPDATE_SCHEMA = {
@@ -63,5 +67,9 @@ router.route('/event/:event_id')
 
 router.route('/event/:event_id/image')
   .patch(schemaValidator(UPDATE_IMAGE_SCHEMA), Events.updateImage);
+
+router.route('/event/:event_id/link')
+  .post(Events.linkEvent)
+  .delete(Events.detachCause);
 
 module.exports = router;

@@ -6,6 +6,8 @@ import { newError, dbError } from '../utils/errorHandler';
 import { imageUpload, deleteImage } from '../utils/imageUpload';
 import { Event } from './neo4j/event';
 
+const isDateValid = (start, end) => (start < end);
+
 const readAll = (req, res, next) => {
   const session = getSession(req);
   const userId = req.params.user_id ? req.params.user_id : req.user.id;
@@ -58,10 +60,15 @@ const add = (req, res, next) => {
     mediaSrc: 'event',
   };
 
+  const { startDate, endDate } = req.body;
+  if (!isDateValid(startDate, endDate)) {
+    next(newError(403, 'startDate cannot be later than endDate'));
+  }
+
   imageUpload(imageParams)
     .then((imageResult) => {
       const { fullId } = imageResult;
-      const newEventParam = _.chain(req.body).omit('imageData').extend({ image: fullId }).value();
+      const newEventParam = _.chain(req.body).omit('imageData').extend(fullId ? { image: fullId } : {}).value();
       const params = _.assign({}, newEventParam, {
         user_id: req.user.id,
         event_id: eventId,
@@ -145,6 +152,14 @@ const update = (req, res, next) => {
   if (_.isEmpty(req.body)) {
     throw newError(404, 'request body must at least contain one prop');
   }
+  const { startDate, endDate } = req.body;
+  if (!(startDate && endDate)) {
+    next(newError(403, 'must provide startDate and endDate'));
+    if (!isDateValid(startDate, endDate)) {
+      next(newError(403, 'startDate cannot be later than endDate'));
+    }
+  }
+
   const session = getSession(req);
   const params = _.assign({}, {
     event_id: req.params.event_id,
@@ -236,8 +251,73 @@ const updateImage = (req, res, next) => {
       .catch(err => (
         next(dbError(err))
       ));
-    })
+    });
+};
 
+const linkEvent = (req, res, next) => {
+  //  body => { end: end-event-id}
+  const session = getSession(req);
+  const params = {
+    start_id: req.params.event_id,
+    end_id: req.body.end,
+    user_id: req.user.id,
+  };
+  const names = {
+    start: 'startEvt',
+    user: 'user',
+    end: 'endEvt',
+    rel: 'r',
+  };
+  const startParams = { id: 'start_id' };
+  const endNode = { name: names.end, label: 'Event' };
+  const endParams = { id: 'end_id' };
+  const userParams = { id: 'user_id' };
+  return session.run(Events.linkEvent(startParams, endNode, endParams, userParams, names), params)
+    .then((results) => {
+      if (_.isEmpty(results.records)) {
+        throw newError(404, 'No events found');
+      }
+      res.status(200).json({
+        message: 'Events linked',
+        rel: results.records[0].get(names.rel),
+      });
+    })
+    .catch(err => (
+      next(dbError(err))
+    ));
+};
+
+const detachCause = (req, res, next) => {
+  //  body => { end: end-event-id}
+  const session = getSession(req);
+  const params = {
+    start_id: req.params.event_id,
+    end_id: req.body.end,
+    user_id: req.user.id,
+  };
+  const names = {
+    start: 'startEvt',
+    user: 'user',
+    end: 'endEvt',
+    rel: 'r',
+  };
+  const startParams = { id: 'start_id' };
+  const endNode = { name: names.end, label: 'Event' };
+  const endParams = { id: 'end_id' };
+  const userParams = { id: 'user_id' };
+  return session.run(Events.detachEvent(startParams, endNode, endParams, userParams, names), params)
+  .then((results) => {
+    if (_.isEmpty(results.records)) {
+      throw newError(404, 'No available relationship found');
+    }
+    res.status(200).json({
+      message: 'Event detached from the event',
+      deletedRel: results.records[0].get(names.rel),
+    });
+  })
+  .catch(err => (
+    next(dbError(err))
+  ));
 };
 
 module.exports = {
@@ -247,4 +327,6 @@ module.exports = {
   deleteEvent,
   update,
   updateImage,
+  linkEvent,
+  detachCause,
 };
