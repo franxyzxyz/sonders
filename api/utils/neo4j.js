@@ -18,6 +18,10 @@ const compose = {
     const queryParam = `{${_.map(_.keys(params), param => `${param}: {${param}}`).join(',')}}`;
     return `MATCH (${node.name}:${node.label} ${queryParam}) `;
   },
+  optionalMatch: (node, params) => {
+    const queryParam = `{${_.map(_.keys(params), param => `${param}: {${param}}`).join(',')}}`;
+    return `OPTIONAL MATCH (${node.name}:${node.label} ${queryParam}) `;
+  },
   matchNode: (matchingNode, matchingParam, startNode, startParam, rel) => {
     const matchingQuery = _.isEmpty(matchingParam) ? '' : `{${_.map(_.keys(matchingParam), param => `${param}: {${matchingParam[param]}}`).join(',')}}`;
     const startQuery = `{${_.map(_.keys(startParam), param => `${param}: {${startParam[param]}}`).join(',')}}`;
@@ -44,6 +48,11 @@ const compose = {
     const endParamsQuery = `${_.map(_.keys(endParams), param => `${param}: {${endParams[param]}}`).join(',')}`;
     return `MATCH (${start.name}:${start.label} {${startParamsQuery}})-[${rel.name}:${rel.label}]->(${end.name}:${end.label} {${endParamsQuery}}) `;
   },
+  matchRelBidir: (start, end, rel, startParams, endParams) => {
+    const startParamsQuery = `${_.map(_.keys(startParams), param => `${param}: {${startParams[param]}}`).join(',')}`;
+    const endParamsQuery = `${_.map(_.keys(endParams), param => `${param}: {${endParams[param]}}`).join(',')}`;
+    return `MATCH (${start.name}:${start.label} {${startParamsQuery}})-[${rel.name}:${rel.label}]-(${end.name}:${end.label} {${endParamsQuery}}) `;
+  },
   merge: (node, params) => {
     const queryParam = '{ id: {id} }';
     // const queryParam = `{${_.map(_.keys(params), param => `${param}: {${param}}`).join(',')}}`;
@@ -64,6 +73,9 @@ const compose = {
 };
 
 const Users = {
+  ifExists: (username, email) => (
+    `${compose.optionalMatch({ name: 'username', label: 'User' }, username)} ${compose.optionalMatch({ name: 'email', label: 'User' }, email)} RETURN username, email`
+  ),
   read: params => (
     `${compose.match({ name: 'user', label: 'User' }, params)} RETURN user`
   ),
@@ -103,6 +115,24 @@ const Events = {
     WITH ${names.event}, ${names.event}.image AS orgImage
     ${compose.onMatchSet({ name: names.event, label: 'Event', item: eventParams.id }, newParams)} RETURN ${names.event}, orgImage`
   ),
+  linkEvent: (startParams, endNode, endParams, userParams, names) => {
+    const userNode = { name: names.user, label: 'User' };
+    const startNode = { name: names.start, label: 'Event' };
+    return `${compose.matchRe(userNode, startNode, { label: 'OWNS' }, userParams, startParams)}
+    WITH ${names.start}
+    ${compose.matchRe(userNode, endNode, { label: 'OWNS' }, userParams, endParams)}
+    ${compose.relateAs(startNode, endNode, { name: names.rel, label: 'CAUSES' })}
+    RETURN ${names.start}, ${names.end}, ${names.rel}`;
+  },
+  detachEvent: (startParams, endNode, endParams, userParams, names) => {
+    const userNode = { name: names.user, label: 'User' };
+    const startNode = { name: names.start, label: 'Event' };
+    return `${compose.matchRe(userNode, startNode, { label: 'OWNS' }, userParams, startParams)}
+    WITH ${names.start}
+    ${compose.matchRelBidir(startNode, endNode, { name: names.rel, label: 'CAUSES' }, startParams, endParams)}
+    WITH ${names.rel}, ${names.rel} AS deletedRel DELETE ${names.rel}
+    RETURN ${names.rel}`;
+  },
 };
 
 const Stories = {
@@ -135,7 +165,7 @@ const Stories = {
     WITH ${names.story}
     ${compose.matchRe(userNode, linkToNode, { label: 'OWNS' }, userParams, linkToNodeParams)}
     ${compose.relateAs(linkToNode, storyNode, { name: names.rel, label: 'PART_OF'})}
-    RETURN ${names.story}, ${names.linkTo}, ${names.rel}`
+    RETURN ${names.story}, ${names.linkTo}, ${names.rel}`;
   },
   detachFrom: (storyParams, linkToNode, linkToNodeParams, userParams, names) => {
     const userNode = { name: names.user, label: 'User' };
