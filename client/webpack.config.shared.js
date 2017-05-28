@@ -16,6 +16,7 @@ module.exports = function generateConfig(target) {
         NODE_ENV: `'${process.env.NODE_ENV}'`,
         WEBPACK: `'${process.env.WEBPACK}'`,
         PORT: `'${process.env.PORT}'`,
+        API_URL: `'${process.env.API_URL}'`,
       },
     }),
   ];
