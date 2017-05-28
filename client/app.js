@@ -29,28 +29,25 @@ if (process.env.NODE_ENV !== 'production') {
   app.use('/', express.static(path.join(__dirname, '/build')));
 
   app.get('*', (req, res) => {
-    const ReactRouterContext = React.createFactory(RouterContext);
     const ReduxProvider = React.createFactory(Provider);
-    let store = require('./src/reducers');
-    const routes = require('./src/routes');
+    const { configureStore } = require('./src/reducers');
+    const serverConfig = require('./src/routes/server');
+    const { generalState } = require('./src/reducers/initState');
 
-    const initialState = {
-      count: 0,
-    };
+    const context = {};
+    const store = configureStore(generalState);
 
-    store = store.configureStore(initialState);
-
-    match({ routes, location: req.url }, (err, redirectLocation, renderProps) => {
-      if (err) {
-        res.status(503);
-      } else if (redirectLocation) {
-        return res.redirect(302, redirectLocation.pathname + redirectLocation.search);
-      } else if (renderProps) {
-        return res.send(`<!DOCTYPE html>${ReactDOMServer.renderToString(
-          ReduxProvider({ store }, ReactRouterContext(renderProps)))}`);
-      }
-      return null;
-    });
+    if (context.url) {
+      return res.redirect(302, context.url);
+    } else {
+      const renderHTML = ReactDOMServer.renderToString(
+        ReduxProvider(
+          { store },
+          serverConfig(req, context, store.getState())
+        )
+      );
+      return res.send(`<!DOCTYPE html>${renderHTML}`);
+    }
   });
 }
 
