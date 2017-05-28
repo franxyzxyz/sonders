@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
+import PropTypes from 'prop-types';
 import axios from 'axios';
 import styles from './Resend.css';
 import Loading from '../../components/Loading/Loading';
@@ -104,9 +105,8 @@ class Verify extends React.Component {
 }
 
 Verify.propTypes = {
-  // count: React.PropTypes.number,
-  auth: React.PropTypes.shape({}),
-  login: React.PropTypes.func,
+  auth: PropTypes.shape({}),
+  login: PropTypes.func,
 };
 //
 // const mapDispatchToProps = dispatch => ({

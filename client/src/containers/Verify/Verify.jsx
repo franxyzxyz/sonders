@@ -1,9 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
-import axios from 'axios';
+import PropTypes from 'prop-types';
 import styles from './Verify.css';
-import config from '../../../config';
+import { sendVerification } from '../../actions';
+import { SEND_VERIFICATION } from '../../actions/constants';
 
 class Verify extends React.Component {
   constructor(props) {
@@ -12,54 +13,16 @@ class Verify extends React.Component {
       result: null,
       isFetching: false,
     };
-    this.verify = this.verify.bind(this);
-    this.login = () => browserHistory.push('/login');
-  }
-
-  componentDidMount() {
-    this.verify();
-  }
-
-  resend() {
-    // [WIP] Resend verification token
-  }
-
-  verify() {
-    const { query } = this.props.location;
-    if (this.props.auth.isLoggedIn()) {
-      // this.props.auth.logout();
-      browserHistory.push('/')
-      return;
-    }
-    this.setState({
-      isFetching: true,
-    });
-    if (query.click) {
-      axios.get(`${config.apiPath}/verify?click=${query.click}`)
-        .then((result) => {
-          if (result.data.user) {
-            this.setState({
-              result: result.data.user.email,
-              isFetching: false,
-            });
-          }
-        })
-        .catch((err) => {
-          this.setState({
-            isFetching: false,
-          })
-        })
-    } else {
-      this.setState({
-        isFetching: false,
-      });
-      browserHistory.push('login')
-    }
+    this.login = () => this.props.history.push('/login');
+    this.verify = () => {
+      this.props.dispatch(sendVerification());
+    };
   }
 
   render() {
     const { isFetching, result } = this.state;
-    if (isFetching) {
+    const { request, error, verified } = this.props;
+    if (request) {
       return (
         <div className={styles.loginStatus}>Verifying...</div>
       );
@@ -68,18 +31,18 @@ class Verify extends React.Component {
     const verificationResult = verifiedEmail => ({
       message: verifiedEmail ? <div>Account Successfully Verified<p>{verifiedEmail}</p><div>Welcome to Sonders!</div></div> :
       <div>Failed to verify</div>,
-      action: verifiedEmail ? this.login : this.resend,
+      action: verifiedEmail ? this.login : this.verify,
       actionMsg: verifiedEmail ? 'Log In' : 'Resend Verification Email',
     });
     return (
       <div className={styles.title}>
         <div className={styles.loginBox}>
           <div className={styles.loginStatus}>
-            {verificationResult(result).message}
+            {verificationResult(verified).message}
           </div>
           <div className={styles.loginAction}>
-            <button onClick={verificationResult(result).action}>
-              {verificationResult(result).actionMsg}
+            <button onClick={verificationResult(verified).action}>
+              {verificationResult(verified).actionMsg}
             </button>
           </div>
         </div>
@@ -89,26 +52,17 @@ class Verify extends React.Component {
 }
 
 Verify.propTypes = {
-  // count: React.PropTypes.number,
-  auth: React.PropTypes.shape({}),
-  login: React.PropTypes.func,
+  request: PropTypes.bool,
+  dispatch: PropTypes.func,
+  verified: PropTypes.bool,
 };
-//
-// const mapDispatchToProps = dispatch => ({
-//   login: () => {
-//     console.log(this.username)
-//     console.log(this.password)
-//     // fetch('localhost:3000/login', {
-//     //   method: 'POST',
-//     //   body: JSON.stringify()
-//     // })
-//     // .then(function(res){ return res.json(); })
-//
-//   }
-// })
+
+const mapStateToProps = state => ({
+  request: state.currentRequest[SEND_VERIFICATION],
+  error: state.requestError[SEND_VERIFICATION],
+  verified: state.verified,
+});
 
 module.exports = connect(
-  // null,
-  // mapStateToProps,
-  // mapDispatchToProps,
+  mapStateToProps,
 )(Verify);

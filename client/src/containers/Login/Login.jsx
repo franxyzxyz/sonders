@@ -1,62 +1,25 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { browserHistory } from 'react-router';
-import cx from 'classnames';
-import axios from 'axios';
+import PropTypes from 'prop-types';
 import styles from './Login.css';
 import Loading from '../../components/Loading/Loading';
+import { postLogin, postLogout } from '../../actions';
+import { POST_LOGIN } from '../../actions/constants';
 
 class Login extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      isFetching: false,
-      loggedIn: this.props.auth.isLoggedIn(),
+    const { dispatch } = this.props;
+    this.login = () => {
+      dispatch(postLogin(this.username.value, this.password.value));
     };
-    this.login = this.login.bind(this);
-    this.logout = this.logout.bind(this);
-  }
-
-  componentDidMount() {
-    if (this.props.auth.isLoggedIn()) {
-      console.log('already logged in')
-
-    }
-  }
-
-  componentDidUpdate() {
-    if (this.props.auth.isLoggedIn()) {
-      console.log('already logged in')
-    }
-  }
-
-  login() {
-    this.setState({
-      isFetching: true,
-    });
-    axios.post('http://localhost:3000/api/v0/login', {
-      username: this.username.value,
-      password: this.password.value,
-    })
-    .then((result) => {
-      this.setState({
-        isFetching: false,
-      });
-      this.props.auth.setToken(result.data.token);
-      browserHistory.push('profile/123');
-    })
-    // [WIP] - catch error
-  }
-
-  logout() {
-    this.props.auth.logout();
-    this.setState({
-      loggedIn: false,
-    })
+    this.logout = () => {
+      dispatch(postLogout());
+    };
   }
 
   render() {
-    const { isFetching, loggedIn } = this.state;
+    const { request, loggedIn, error } = this.props;
     if (loggedIn) {
       return (
         <div className={styles.title}>
@@ -67,20 +30,22 @@ class Login extends React.Component {
             </div>
           </div>
         </div>
-
-      )
+      );
     }
     return (
       <div className={styles.title}>
         <div className={styles.loginBox}>
-          {isFetching ?
+          {request ?
             <Loading /> :
             <div className={styles.loginContent}>
+              {error &&
+                <div className={styles.hint}>{error} Please try again</div>
+              }
               <input type="text" placeholder="username" ref={(c) => { this.username = c; }} />
               <div className={styles.link}>
                 <div />
               </div>
-              <input type="password" placeholder="password" ref={(c) => { this.password = c; }}/>
+              <input type="password" placeholder="password" ref={(c) => { this.password = c; }} />
               <div className={styles.link}>
                 <div />
               </div>
@@ -93,29 +58,21 @@ class Login extends React.Component {
       </div>
     );
   }
-};
+}
 
 Login.propTypes = {
-  // count: React.PropTypes.number,
-  auth: React.PropTypes.shape({}),
-  login: React.PropTypes.func,
+  dispatch: PropTypes.func,
+  request: PropTypes.bool,
+  loggedIn: PropTypes.bool,
+  error: PropTypes.string,
 };
-//
-// const mapDispatchToProps = dispatch => ({
-//   login: () => {
-//     console.log(this.username)
-//     console.log(this.password)
-//     // fetch('localhost:3000/login', {
-//     //   method: 'POST',
-//     //   body: JSON.stringify()
-//     // })
-//     // .then(function(res){ return res.json(); })
-//
-//   }
-// })
+
+const mapStateToProps = state => ({
+  error: state.requestError[POST_LOGIN],
+  request: state.currentRequest[POST_LOGIN],
+  loggedIn: state.loggedIn,
+});
 
 module.exports = connect(
-  // null,
-  // mapStateToProps,
-  // mapDispatchToProps,
+  mapStateToProps,
 )(Login);

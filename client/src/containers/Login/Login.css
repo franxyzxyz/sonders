@@ -46,6 +46,12 @@ $radius: 20px;
     .loginContent {
       display: flex;
       flex-direction: column;
+      .hint {
+        padding: 5px;
+        text-align: center;
+        font-size: 0.8em;
+        color: #999;
+      }
       .link {
         display: flex;
         justify-content: center;
