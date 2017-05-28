@@ -1,5 +1,6 @@
 @import '../../utils/styles/global.css';
 
-.wrapper {
-  background: $theme;
+.error {
+  font-size: 0.9em;
+  color: #999;
 }

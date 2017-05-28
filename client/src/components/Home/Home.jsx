@@ -4,7 +4,7 @@ import styles from './Home.css';
 class Home extends React.Component {
   render() {
     return (
-      <div>
+      <div className={styles.wrapper}>
         Home
       </div>
     )

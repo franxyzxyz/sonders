@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { browserHistory, Link } from 'react-router';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
 import styles from './Navigation.css';
@@ -57,8 +58,8 @@ class Navigation extends React.Component {
 }
 
 Navigation.propTypes = {
-  auth: React.PropTypes.shape({
-    logout: React.PropTypes.func,
+  auth: PropTypes.shape({
+    logout: PropTypes.func,
   }),
 };
 
