@@ -5,8 +5,10 @@ import passport from 'passport';
 import bodyParser from 'body-parser';
 import expressjwt from 'express-jwt';
 import logger from 'morgan';
+import admin from 'firebase-admin';
 import nconf from './config';
 import { users, events, medias, stories } from './routes';
+const serviceAccount = require('./config/fbserviceAccountKey.json');
 
 require('./utils/passport')(passport);
 
@@ -16,7 +18,7 @@ const api = express();
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', nconf.get('client_url'));
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,Authorization');
   res.setHeader('Access-Control-Allow-Credentials', true);
   next();
 });
@@ -24,6 +26,11 @@ app.use((req, res, next) => {
 app.use(bodyParser.json({ limit: '5mb' }));
 app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
 app.use(logger('dev'));
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://sonders-94ef7.firebaseio.com',
+});
 
 const options = {
   swaggerDefinition: {

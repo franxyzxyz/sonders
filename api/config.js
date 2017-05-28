@@ -22,6 +22,7 @@ nconf.env(['PORT', 'NODE_ENV'])
     base_url: 'http://localhost:3000',
     client_url: 'http://localhost:3001',
     api_path: '/api/v0',
+    fbdatabaseURL: 'https://sonders-94ef7.firebaseio.com',
     CLOUDINARY_URL: process.env.CLOUDINARY_URL,
     MAILGUN_API_KEY: process.env.MAILGUN_KEY,
     MAILGUN_DOMAIN: process.env.MAILGUN_DOMAIN,
@@ -55,6 +56,9 @@ nconf.env(['PORT', 'NODE_ENV'])
       title: {
         minLength: 1,
         maxLength: 200,
+      },
+      paragraph: {
+        maxLength: 1000,
       },
     },
     media: {
