@@ -8,3 +8,5 @@ export const POST_LOGIN = 'POST_LOGIN';
 export const POST_LOGOUT = 'POST_LOGOUT';
 export const SEND_VERIFICATION = 'SEND_VERIFICATION';
 export const SET_USER = 'SET_USER';
+
+export const POST_REGISTER = 'POST_REGISTER';

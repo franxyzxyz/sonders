@@ -4,6 +4,7 @@ import {
   SET_USER,
   POST_LOGOUT,
   SEND_VERIFICATION,
+  POST_REGISTER,
 } from './constants';
 
 export const getEventSelf = () => ({
@@ -28,4 +29,9 @@ export const retrieveUser = (state, verified) => ({
 
 export const sendVerification = () => ({
   type: SEND_VERIFICATION,
+});
+
+export const postRegister = user => ({
+  type: POST_REGISTER,
+  user,
 });

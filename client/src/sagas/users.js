@@ -7,6 +7,7 @@ import {
   SET_USER,
   POST_LOGOUT,
   SEND_VERIFICATION,
+  POST_REGISTER,
 } from '../actions/constants';
 // import {
 //   getEvents,
@@ -59,8 +60,24 @@ function* verifyFlow() {
   }
 }
 
+function* registerFlow() {
+  while (true) {
+    const { user } = yield take(POST_REGISTER);
+    yield put({ type: SENDING_REQUEST, current: { action: POST_REGISTER, state: true } });
+    try {
+      const result = yield call(auth.register, user);
+      yield put({ type: SENDING_REQUEST, current: { action: POST_REGISTER, state: false } });
+      // [WIP] need to tell Register.jsx that its been done
+    } catch (error) {
+      yield put({ type: REQUEST_ERROR, error: error.code, actionType: POST_REGISTER });
+      yield put({ type: SENDING_REQUEST, current: { action: POST_REGISTER, state: false } });
+    }
+  }
+}
+
 module.exports = {
   loginFlow,
   logoutFlow,
   verifyFlow,
+  registerFlow,
 };

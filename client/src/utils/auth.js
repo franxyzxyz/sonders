@@ -1,7 +1,9 @@
 /* eslint-disable no-undef, class-methods-use-this */
 import _ from 'lodash';
 import jwtDecode from 'jwt-decode';
+import axios from 'axios';
 import { fbauth } from '../firebase';
+const API_URL = process.env.API_URL;
 
 export default class Auth {
   isLoggedIn() {
@@ -56,6 +58,23 @@ export default class Auth {
   sendVerification() {
     const user = fbauth.currentUser;
     user.sendEmailVerification().then((s) => console.log(s))
+  }
+
+  register(user) {
+    return new Promise((resolve, reject) => {
+      const { email, displayName, password } = user;
+      axios.post(`${API_URL}/register`, {
+        email,
+        displayName,
+        password,
+      })
+      .then((result) => {
+        resolve(result.user);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+    });
   }
 
 }

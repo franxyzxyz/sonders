@@ -1,11 +1,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 // import { browserHistory } from 'react-router';
 // import cx from 'classnames';
 import _ from 'lodash';
 // import axios from 'axios';
 import styles from './Register.css';
+import { postRegister } from '../../actions';
+import { POST_REGISTER } from '../../actions/constants';
 // import Loading from '../../components/Loading/Loading';
 import config from '../../../config';
 import { schemaValidator } from '../../utils/validation';
@@ -59,68 +62,80 @@ const REGISTER_SCHEMA = {
   required: ['name', 'username', 'password', 'email', 'confirmPassword'],
 };
 
+const DisabledButton = styled.button`
+  outline: none;
+  flex: 1;
+  border: 0;
+  border-radius: 20px;
+  font-size: 1em;
+  color: #fff;
+  font-family: Karla, sans-serif;
+  padding: 5px 15px;
+  background: #cbc6c6;
+  transition: 0.1s ease-out;
+`;
+const Button = styled.button`
+  outline: none;
+  cursor: pointer;
+  flex: 1;
+  border: 0;
+  border-radius: 20px;
+  font-size: 1em;
+  color: #fff;
+  font-family: Karla, sans-serif;
+  padding: 5px 15px;
+  background: #ffbf00;
+  transition: 0.1s ease-out;
+  &:hover {
+    color: #444;
+  }
+`;
+
 class Register extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       isFetching: false,
       fields: {
-        name: '',
-        username: '',
+        displayName: '',
         password: '',
         email: '',
-        confirmPassword: '',
       },
-      fieldError: {},
+      fieldError: {
+        password: true,
+      },
     };
     this.register = this.register.bind(this);
-    this.fieldChange = (fieldName, value) => {
+    this.fieldChange = (fieldName, value, error) => {
       this.setState(prevState => ({
         fields: _.assign({}, prevState.fields, {
           [fieldName]: value,
+        }),
+        fieldError: _.assign({}, prevState.fieldError, {
+          [fieldName]: error,
         }),
       }));
     };
   }
 
   register() {
-    if (_.some(_.values(this.state.fields), value => !value)) {
-      _.each(this.state.fields, (field, key) => {
-        if (!field) {
-          this.setState((prevState, props) => {
-            return { fieldError: _.assign({}, prevState.fieldError, {
-              [key]: 'cannot be empty'
-            })};
-          });
-        } else {
-          this.setState((prevState, props) => {
-            return { fieldError: _.assign({}, prevState.fieldError, {
-              [key]: null
-            })};
-          });
-        }
-      })
-    }
-    this.setState({
-      isFetching: true,
-    });
-    // axios.post('http://localhost:3000/api/v0/register', {
-    //   username: this.username.value,
-    //   password: this.password.value,
-    //
-    // })
-    // .then((result) => {
-    //   this.setState({
-    //     isFetching: false,
-    //   });
-    //   this.props.auth.setToken(result.data.token);
-    //   browserHistory.push('profile/123');
-    // })
-    // [WIP] - catch error
+    const { displayName, email, password } = this.state.fields;
+    this.props.dispatch(postRegister({ displayName, email, password }));
   }
 
   render() {
     const { fieldError, fields } = this.state;
+    const okToSubmit = !_.some(_.values(fields), value => !value) && _.every(_.values(fieldError), value => !value);
+    const { request } = this.props;
+
+    if (request) {
+      console.log(request.result)
+    }
+    if (request) {
+      return(
+        <div>Loading...</div>
+      )
+    }
     return (
       <div className={styles.wrapper}>
         <div className={styles.registerBox}>
@@ -128,17 +143,6 @@ class Register extends React.Component {
             Register
           </div>
           <div className={styles.registerContent}>
-            <Input
-              type="text"
-              placeholder="Username"
-              onChange={this.fieldChange}
-              name="username"
-              value={fields.username}
-              error={fieldError.username}
-            />
-            <div className={styles.link}>
-              <div />
-            </div>
             <Input
               type="email"
               placeholder="Email"
@@ -153,8 +157,8 @@ class Register extends React.Component {
               type="text"
               placeholder="Display Name"
               onChange={this.fieldChange}
-              name="name"
-              error={fieldError.name}
+              name="displayName"
+              error={fieldError.displayName}
             />
             <div className={styles.link}>
               <div />
@@ -162,25 +166,22 @@ class Register extends React.Component {
             <Input
               type="password"
               placeholder="Password (minimum 8 characters)"
+              validatePlaceHolder="Confirm Password"
               onChange={this.fieldChange}
               name="password"
+              validate="same"
+              minLength={8}
               error={fieldError.password}
             />
             <div className={styles.link}>
               <div />
             </div>
-            <Input
-              type="password"
-              placeholder="Confirm Password"
-              onChange={this.fieldChange}
-              name="confirmPassword"
-              error={fieldError.confirmPassword}
-            />
-            <div className={styles.link}>
-              <div />
-            </div>
             <div className={styles.registerAction}>
-              <button type="submit" onClick={this.register} className={styles.basicButton}>Join Sonders</button>
+              {!okToSubmit ?
+                <DisabledButton type="submit">Join Sonders</DisabledButton>
+                :
+                <Button type="submit" onClick={this.register}>Join Sonders</Button>
+              }
             </div>
           </div>
         </div>
@@ -207,9 +208,12 @@ Register.propTypes = {
 //
 //   }
 // })
+const mapStateToProps = state => ({
+  request: state.currentRequest[POST_REGISTER]
+});
 
 module.exports = connect(
   // null,
-  // mapStateToProps,
+  mapStateToProps,
   // mapDispatchToProps,
 )(Register);
