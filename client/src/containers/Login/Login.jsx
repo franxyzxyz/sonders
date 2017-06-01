@@ -5,33 +5,33 @@ import styles from './Login.css';
 import Loading from '../../components/Loading/Loading';
 import { postLogin, postLogout } from '../../actions';
 import { POST_LOGIN } from '../../actions/constants';
+import Input from '../../styles/Input';
+import Button from '../../styles/Button';
+import TextButton from '../../styles/TextButton';
 
 class Login extends React.Component {
   constructor(props) {
     super(props);
     const { dispatch } = this.props;
     this.login = () => {
-      dispatch(postLogin(this.username.value, this.password.value));
-    };
-    this.logout = () => {
-      dispatch(postLogout());
+      dispatch(postLogin(this.email.value, this.password.value));
     };
   }
 
-  render() {
-    const { request, loggedIn, error } = this.props;
-    if (loggedIn) {
-      return (
-        <div className={styles.title}>
-          <div className={styles.loginBox}>
-            <div className={styles.loginStatus}>You have Logged In</div>
-            <div className={styles.loginAction}>
-              <button onClick={this.logout}>Log Out?</button>
-            </div>
-          </div>
-        </div>
-      );
+  componentDidMount() {
+    if (this.props.loggedIn) {
+      this.props.history.push('/top');
     }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.loggedIn) {
+      this.props.history.push('/top');
+    }
+  }
+
+  render() {
+    const { request, error } = this.props;
     return (
       <div className={styles.title}>
         <div className={styles.loginBox}>
@@ -41,17 +41,18 @@ class Login extends React.Component {
               {error &&
                 <div className={styles.hint}>{error} Please try again</div>
               }
-              <input type="text" placeholder="username" ref={(c) => { this.username = c; }} />
+              <Input type="email" placeholder="Email" innerRef={(c) => { this.email = c; }} />
               <div className={styles.link}>
                 <div />
               </div>
-              <input type="password" placeholder="password" ref={(c) => { this.password = c; }} />
+              <Input type="password" placeholder="Password" innerRef={(c) => { this.password = c; }} />
               <div className={styles.link}>
                 <div />
               </div>
               <div className={styles.loginAction}>
-                <button onClick={this.login}>Log In</button>
+                <Button onClick={this.login}>Log In</Button>
               </div>
+              <TextButton onClick={()=>{}}>Forgot password?</TextButton>
             </div>
           }
         </div>

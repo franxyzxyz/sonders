@@ -8,11 +8,8 @@ $radius: 20px;
   display: flex;
   justify-content: center;
   .registerBox {
-    /*border: 2px solid $standout;*/
-    background: #ececec;
     padding: 30px;
     align-self: center;
-    /*display: flex;
     flex-direction: column;*/
     input {
       display: block;

@@ -13,6 +13,8 @@ import { POST_REGISTER } from '../../actions/constants';
 import config from '../../../config';
 import { schemaValidator } from '../../utils/validation';
 import Input from '../../components/Input/Input';
+import StyledButton from '../../styles/Button';
+import StyledDisabledButton from '../../styles/DisabledButton';
 
 const REGISTER_SCHEMA = {
   type: 'object',
@@ -62,34 +64,23 @@ const REGISTER_SCHEMA = {
   required: ['name', 'username', 'password', 'email', 'confirmPassword'],
 };
 
-const DisabledButton = styled.button`
-  outline: none;
-  flex: 1;
-  border: 0;
-  border-radius: 20px;
-  font-size: 1em;
-  color: #fff;
-  font-family: Karla, sans-serif;
-  padding: 5px 15px;
-  background: #cbc6c6;
-  transition: 0.1s ease-out;
-`;
-const Button = styled.button`
-  outline: none;
-  cursor: pointer;
-  flex: 1;
-  border: 0;
-  border-radius: 20px;
-  font-size: 1em;
-  color: #fff;
-  font-family: Karla, sans-serif;
-  padding: 5px 15px;
-  background: #ffbf00;
-  transition: 0.1s ease-out;
-  &:hover {
-    color: #444;
-  }
-`;
+
+// const Button = styled.button`
+//   outline: none;
+//   cursor: pointer;
+//   flex: 1;
+//   border: 0;
+//   border-radius: 20px;
+//   font-size: 1em;
+//   color: #fff;
+//   font-family: Karla, sans-serif;
+//   padding: 5px 15px;
+//   background: #ffbf00;
+//   transition: 0.1s ease-out;
+//   &:hover {
+//     color: #444;
+//   }
+// `;
 
 class Register extends React.Component {
   constructor(props) {
@@ -178,9 +169,9 @@ class Register extends React.Component {
             </div>
             <div className={styles.registerAction}>
               {!okToSubmit ?
-                <DisabledButton type="submit">Join Sonders</DisabledButton>
+                <StyledDisabledButton type="submit">Join Sonders</StyledDisabledButton>
                 :
-                <Button type="submit" onClick={this.register}>Join Sonders</Button>
+                <StyledButton type="submit" onClick={this.register}>Join Sonders</StyledButton>
               }
             </div>
           </div>

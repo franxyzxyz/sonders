@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import styles from './Input.css';
 import ToolTip from '../Tooltip';
+import StyledInput from '../../styles/Input';
 
 const InputWrapper = styled.div`
   position: relative;
@@ -59,11 +60,10 @@ class Input extends React.Component {
       return (
         <div>
           <InputWrapper>
-            <input
+            <StyledInput
               type={type}
               placeholder={placeholder}
               value={value}
-              className={styles.basicInput}
               onChange={this.onChange}
             />
             {error &&
@@ -74,11 +74,10 @@ class Input extends React.Component {
             <div />
           </div>
           <InputWrapper>
-            <input
+            <StyledInput
               type={type}
               placeholder={validatePlaceHolder}
               value={validateValue}
-              className={styles.basicInput}
               onChange={this.validateOnChange}
             />
             {validateError &&
@@ -90,11 +89,10 @@ class Input extends React.Component {
     }
     return (
       <InputWrapper>
-        <input
+        <StyledInput
           type={type}
           placeholder={placeholder}
           value={value}
-          className={styles.basicInput}
           onChange={this.onChange}
         />
         {error &&

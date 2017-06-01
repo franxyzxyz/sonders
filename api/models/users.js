@@ -4,6 +4,8 @@ import jwt from 'jsonwebtoken';
 import mailgun from 'mailgun-js';
 import moment from 'moment';
 import jwtDecode from 'jwt-decode';
+import admin from 'firebase-admin';
+
 import nconf from '../config';
 import { getSession, Users } from '../utils/neo4j';
 import { newError, dbError } from '../utils/errorHandler';
@@ -29,49 +31,36 @@ const mg = mailgun({
 */
 
 const register = (req, res, next) => {
-  const { username, email } = req.body;
+  const { displayName, email, password } = req.body;
+
   const session = getSession(req);
-  session.run(Users.ifExists({ username }, { email }), { username, email })
-  .then((results) => {
-    if (!_.isEmpty(results.records)) {
-      const existUsername = results.records[0].get('username');
-      const existEmail = results.records[0].get('email');
-      if (existUsername && existEmail) {
-        throw newError(400, 'username/email already in use');
-      } else if (existUsername) {
-        throw newError(400, 'username already in use');
-      } else if (existEmail) {
-        throw newError(400, 'email already in use');
-      }
-      return passport.authenticate('local-signup', (err, user, status) => {
-        if (err || !user) throw newError(400, status.message);
-        const newUser = new User(user);
-        const verifyToken = jwt.sign(newUser, nconf.get('verify_secret'), { expiresIn: '1d' });
 
-        const data = {
-          from: 'Sonders <account@verify.sonders.co>',
-          to: newUser.email,
-          subject: 'Please confirm your account',
-          html: `<html><h1>SONDERS</h1><h2>Email address confirmation</h2><p>Thank you for signing up. Please verify your email address by clicking the following link:<a href="${nconf.get('client_url')}/verify?click=${verifyToken}">CLICK HERE</a></html>`
-        };
+  admin.auth().createUser({
+    email,
+    password,
+    displayName,
+  })
+    .then((userRecord) => {
+      const query = 'CREATE (user:User {id: {uid}}) RETURN user';
 
-        mg.messages().send(data, function (error, body) {
-          console.log(body);
-        });
-        return res.status(200).json({
-          success: true,
-          user: newUser,
-          message: status.message,
-        });
-      })(req, res, next);
-    } else {
-      throw newError(400, 'DB error');
-    }
-  })
-  .catch((err) => {
-    next(dbError(err));
-  })
-};
+      return session.run(query, { uid: userRecord.uid })
+      .then((results) => {
+        const user = results.records[0].get('user');
+        if (user) {
+          return res.status(200).json({
+            success: true,
+            user: new User(user),
+            message: 'successfully signed up',
+          });
+        } else {
+          throw newError(400, 'Error with DB connection');
+        }
+      });
+    })
+    .catch((error) => {
+      next(dbError(error));
+    });
+}
 
 const verify = (req, res, next) => {
   const session = getSession(req);
@@ -140,7 +129,6 @@ const resendVerification = (req, res, next) => {
     .catch((err) => {
       next(dbError(err))
     })
-
 }
 
 const login = (req, res, next) => {

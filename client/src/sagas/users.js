@@ -24,6 +24,7 @@ function* loginFlow() {
       const user = yield call(auth.login, email, password);
       yield put({ type: SET_USER, state: true, verified: user.emailVerified });
       yield put({ type: SENDING_REQUEST, current: { action: POST_LOGIN, state: false } });
+      yield put({ type: REQUEST_ERROR, error: null, actionType: POST_LOGIN });
     } catch (error) {
       yield put({ type: REQUEST_ERROR, error: error.code, actionType: POST_LOGIN });
       yield put({ type: SENDING_REQUEST, current: { action: POST_LOGIN, state: false } });
