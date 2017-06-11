@@ -3,4 +3,5 @@ export const generalState = {
   currentRequest: {},
   entities: {},
   requestError: {},
+  homeTimeline: [],
 };

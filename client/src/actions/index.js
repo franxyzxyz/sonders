@@ -5,10 +5,16 @@ import {
   POST_LOGOUT,
   SEND_VERIFICATION,
   POST_REGISTER,
+  POST_EVENT_SELF,
 } from './constants';
 
 export const getEventSelf = () => ({
   type: GET_EVENT_SELF,
+});
+
+export const postEventSelf = data => ({
+  type: POST_EVENT_SELF,
+  data,
 });
 
 export const postLogin = (email, password) => ({

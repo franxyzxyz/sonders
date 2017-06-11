@@ -1,5 +1,5 @@
 import { fork } from 'redux-saga/effects';
-import { getEventsFlow } from './events';
+import { getEventsFlow, postEventFlow } from './events';
 import {
   loginFlow,
   logoutFlow,
@@ -14,6 +14,7 @@ function* root() {
   yield fork(registerFlow);
 
   yield fork(getEventsFlow);
+  yield fork(postEventFlow);
 }
 
 module.exports = root;
