@@ -10,6 +10,7 @@ class Logout extends React.Component {
     super(props);
     this.logout = () => {
       this.props.dispatch(postLogout());
+      this.props.onLogout();
     };
   }
   render() {
@@ -17,7 +18,7 @@ class Logout extends React.Component {
     if (loggedIn) {
       return (
         <LinkButton onClick={this.logout}>Logout</LinkButton>
-      )
+      );
     }
     return null;
   }
@@ -26,6 +27,7 @@ class Logout extends React.Component {
 Logout.propTypes = {
   loggedIn: PropTypes.bool,
   dispatch: PropTypes.func,
+  onLogout: PropTypes.func,
 };
 
 const mapStateToProps = state => ({

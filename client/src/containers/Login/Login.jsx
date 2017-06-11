@@ -19,7 +19,8 @@ class Login extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.loggedIn) {
+    const isFromLogout = this.props.location && this.props.location.state.logout;
+    if (!isFromLogout && this.props.loggedIn) {
       this.props.history.push('/top');
     }
   }
