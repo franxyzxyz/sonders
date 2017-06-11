@@ -1,7 +1,6 @@
 import React from 'react';
-import { Link, Route } from 'react-router-dom';
+import { Link, Route, withRouter } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
-
 import Home from './components/Home/Home';
 import Login from './containers/Login/Login';
 import Register from './containers/Register/Register';
@@ -22,6 +21,9 @@ const routes = [
   },
   { path: '/login',
     component: Login,
+  },
+  { path: '/logout',
+    component: Logout,
   },
   { path: '/register',
     component: Register,
@@ -107,9 +109,14 @@ const Main = styled.div`
 `;
 
 class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.logout = () => {
+      this.props.history.push('/login', { logout: true });
+    };
+  }
   render() {
     const { initialState = {} } = this.props;
-
     const baseContent = (
       <Content id="content">
         <TopWrapper>
@@ -122,7 +129,7 @@ class App extends React.Component {
               </Header>
             </Brand>
           </DefaultLink>
-          <Logout />
+          <Logout onLogout={this.logout} />
         </TopWrapper>
         <Main>
           <Nav />
@@ -160,4 +167,4 @@ class App extends React.Component {
   }
 }
 
-module.exports = App;
+module.exports = withRouter(App);
