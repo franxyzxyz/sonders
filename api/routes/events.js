@@ -4,6 +4,7 @@ import Events from '../models/events';
 import nconf from '../config';
 import { schemaValidator } from '../utils/validation';
 import { category } from '../utils/events';
+import jwtAuth from '../middlewares/jwt';
 
 const router = Router();
 const config = nconf.get('events');
@@ -34,6 +35,10 @@ const NEW_SCHEMA = {
       type: 'string',
       maxLength: nconf.get('media').image.maxLength,
     },
+    description: {
+      type: 'string',
+      maxLength: config.paragraph.maxLength,
+    },
   },
   required: ['title', 'type', 'startDate', 'endDate'],
 };
@@ -57,8 +62,8 @@ const UPDATE_IMAGE_SCHEMA = {
 };
 
 router.route('/event/self')
-  .get(Events.readAll)
-  .post(schemaValidator(NEW_SCHEMA), Events.add);
+  .get(jwtAuth, Events.readAll)
+  .post(jwtAuth, schemaValidator(NEW_SCHEMA), Events.add);
 
 router.route('/event/:event_id')
   .get(Events.read)

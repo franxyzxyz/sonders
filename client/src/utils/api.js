@@ -35,10 +35,11 @@ export const postRegister = (username, password) => {
 };
 
 export const getEvents = () => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
+    const token = await auth.getToken();
     axios.get(`${API_URL}/event/self`, {
       headers: {
-        Authorization: `Bearer ${auth.getToken()}`,
+        Authorization: `Bearer ${token}`,
       },
     })
     .then((result) => {
@@ -49,4 +50,24 @@ export const getEvents = () => {
       reject(error)
     })
   })
+}
+
+export const postEvents = (data) => {
+  return new Promise(async (resolve, reject) => {
+    const token = await auth.getToken();
+    axios.post(`${API_URL}/event/self`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((result) => {
+      console.log(result.data)
+      resolve(result.data)
+    })
+    .catch((error) => {
+      console.log(error)
+      reject(error)
+    })
+  })
+  // 'title', 'type', 'startDate', 'endDate'
 }
